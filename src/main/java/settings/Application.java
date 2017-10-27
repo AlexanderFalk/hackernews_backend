@@ -1,6 +1,8 @@
 package settings;
 
+import Model.User;
 import Routes.App;
+import Routes.UserRoute;
 
 import javax.ws.rs.ApplicationPath;
 import java.util.HashSet;
@@ -16,6 +18,7 @@ public class Application extends javax.ws.rs.core.Application {
     public Set<Class<?>> getClasses() {
         final Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add( App.class );
+        classes.add( UserRoute.class );
         return classes;
     }
 
