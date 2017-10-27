@@ -70,7 +70,6 @@ public class UserRoute {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response postUser(InputStream json) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
