@@ -69,8 +69,8 @@ public class UserRoute {
     }
 
     @POST
-    //@Path("/user")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response postUser(InputStream json) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
@@ -108,7 +108,7 @@ public class UserRoute {
 
         userMap.put(user.getId(), user);
 
-        return Response.ok().entity(values).build();
+        return Response.ok().entity(out.toString()).build();
 
     }
 
