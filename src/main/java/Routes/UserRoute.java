@@ -69,7 +69,7 @@ public class UserRoute {
                 .add("created", foundUser.getString("created"))
                 .add("delay", foundUser.getString("delay"))
                 .add("id", foundUser.getString("id"))
-                .add("karma", foundUser.getString("karma"))
+                .add("karma", foundUser.getInt("karma"))
                 .add("submitted", foundUser.getJSONArray("submitted").toString())
                 .build();
 

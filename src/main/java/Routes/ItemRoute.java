@@ -91,7 +91,7 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-        MongoDB.insertUser(userDoc);
+        MongoDB.updateUser(userDoc);
         MongoDB.insertItem(itemDocument);
 
 
