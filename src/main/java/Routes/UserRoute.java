@@ -8,8 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import javax.json.*;
 import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -59,18 +58,19 @@ public class UserRoute {
         secondSubmitted.put(4);
         secondUser.setSubmitted(secondSubmitted);
 
-        userMap.put(user.getId(), user);
-        userMap.put(secondUser.getId(), secondUser);
-
-        User foundUser = userMap.get(id);
+//        userMap.put(user.getId(), user);
+//        userMap.put(secondUser.getId(), secondUser);
+//
+//        User foundUser = userMap.get(id);
+        JSONObject foundUser = new JSONObject(MongoDB.getUser(id ));
 
         JsonObject jsonObject = Json.createObjectBuilder()
-                .add("about", foundUser.getAbout())
-                .add("created", foundUser.getCreated())
-                .add("delay", foundUser.getDelay())
-                .add("id", foundUser.getId())
-                .add("karma", foundUser.getKarma())
-                .add("submitted", foundUser.getSubmitted().toString())
+                .add("about", foundUser.getString("about"))
+                .add("created", foundUser.getString("created"))
+                .add("delay", foundUser.getString("delay"))
+                .add("id", foundUser.getString("id"))
+                .add("karma", foundUser.getString("karma"))
+                .add("submitted", foundUser.getJSONArray("submitted").toString())
                 .build();
 
         return Response.ok().entity(jsonObject.toString()).build();
@@ -94,7 +94,7 @@ public class UserRoute {
         String delay = null;
         String id = null;
         int karma = 0;
-        String submitted = null;
+        JSONArray submitted = null;
 
         try{
             jsonObject = new JSONObject(out.toString());
@@ -103,11 +103,13 @@ public class UserRoute {
             delay = jsonObject.getString("delay");
             id = jsonObject.getString("id");
             karma = jsonObject.getInt("karma");
-            submitted = jsonObject.getString("submitted");
+            submitted = jsonObject.getJSONArray("submitted");
         }
         catch (JSONException ex){
             ex.printStackTrace();
         }
+
+
 
         JsonObject values = Json.createObjectBuilder()
                 .add("about", about)
@@ -115,8 +117,10 @@ public class UserRoute {
                 .add("delay", delay)
                 .add("id", id)
                 .add("karma", karma)
-                .add("submitted", submitted)
                 .build();
+
+
+
 
         Document document = new Document("id", id)
                 .append("created", created)
