@@ -2,7 +2,7 @@ package Routes;
 
 import Model.User;
 import io.swagger.annotations.Api;
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.json.JsonObject;
@@ -31,7 +31,7 @@ public class UserRoute {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUser(@PathParam("id") String id){
+    public Response getUser(@PathParam("id") String id) {
 
         //Test data 1
         User user = new User();
@@ -70,23 +70,36 @@ public class UserRoute {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response postUser(InputStream json) throws IOException {
+    public Response postUser(InputStream json) throws IOException, JSONException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             out.append(line);
         }
         reader.close();
 
-        JSONObject jsonObject = new JSONObject(out.toString());
-        String about = jsonObject.getString("about");
-        String created = jsonObject.getString("created");
-        String delay = jsonObject.getString("delay");
-        String id = jsonObject.getString("id");
-        int karma = jsonObject.getInt("karma");
-        String submitted = jsonObject.getString("submitted");
+        JSONObject jsonObject = null;
+        String about = null;
+        String created = null;
+        String delay = null;
+        String id = null;
+        int karma = 0;
+        String submitted = null;
+
+        try{
+            jsonObject = new JSONObject(out.toString());
+            about = jsonObject.getString("about");
+            created = jsonObject.getString("created");
+            delay = jsonObject.getString("delay");
+            id = jsonObject.getString("id");
+            karma = jsonObject.getInt("karma");
+            submitted = jsonObject.getString("submitted");
+        }
+        catch (JSONException ex){
+            ex.printStackTrace();
+        }
 
         JsonObject values = Json.createObjectBuilder()
                 .add("about", about)
@@ -107,12 +120,9 @@ public class UserRoute {
 
         userMap.put(user.getId(), user);
 
-        return Response.ok().entity(out.toString()).build();
+        return Response.ok().entity(values.toString()).build();
 
     }
-
-
-
 
 
 }
