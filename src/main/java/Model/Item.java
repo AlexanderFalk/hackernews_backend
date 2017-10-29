@@ -1,6 +1,6 @@
 package Model;
 
-import java.util.List;
+import org.json.JSONArray;
 
 /**
  * When you are using the system and you look at: Stories, comments, jobs,
@@ -18,12 +18,12 @@ public class Item {
     private String text;
     private boolean dead;
     private int parent;
-    private List<Integer> poll;
-    private List<Integer> kids;
+    private JSONArray poll;
+    private JSONArray kids;
     private String url;
     private int score;
     private String title;
-    private List<Integer> parts;
+    private JSONArray parts;
     private int descendants;
 
     // First time item creation
@@ -47,8 +47,8 @@ public class Item {
 
     public Item(int id, boolean deleted, String type, String by,
                 String timestamp, String text, boolean dead,
-                int parent, List<Integer> poll, List<Integer> kids,
-                String url, int score, String title, List<Integer> parts,
+                int parent, JSONArray poll, JSONArray kids,
+                String url, int score, String title, JSONArray parts,
                 int descendants) {
 
         this.id = id;
@@ -132,19 +132,19 @@ public class Item {
         this.parent = parent;
     }
 
-    public List<Integer> getPoll() {
+    public JSONArray getPoll() {
         return poll;
     }
 
-    public void setPoll(List<Integer> poll) {
+    public void setPoll(JSONArray poll) {
         this.poll = poll;
     }
 
-    public List<Integer> getKids() {
+    public JSONArray getKids() {
         return kids;
     }
 
-    public void setKids(List<Integer> kids) {
+    public void setKids(JSONArray kids) {
         this.kids = kids;
     }
 
@@ -172,11 +172,11 @@ public class Item {
         this.title = title;
     }
 
-    public List<Integer> getParts() {
+    public JSONArray getParts() {
         return parts;
     }
 
-    public void setParts(List<Integer> parts) {
+    public void setParts(JSONArray parts) {
         this.parts = parts;
     }
 

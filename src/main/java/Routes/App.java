@@ -20,7 +20,7 @@ public class App {
     @Path("/news")
     @Produces(MediaType.APPLICATION_JSON)
     public Response index(InputStream json) {
-        return Response.ok().entity("Welcome!").status(200).build();
+        return Response.ok().status(200).build();
     }
 
 

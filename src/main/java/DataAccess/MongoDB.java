@@ -2,6 +2,7 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
+import com.google.common.collect.Lists;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -10,7 +11,8 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilder;
+import java.lang.instrument.Instrumentation;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -109,20 +111,25 @@ public class MongoDB {
     // NOT WORKING - STILL TRYING
     public static String getItems() {
 
-        String items = "";
+        List<String> list = Lists.newArrayList();
+
         MongoCursor<Document> cursor = itemCollection.find().iterator();
         try {
             
             while (cursor.hasNext()) {
-                items = cursor.next().toJson();
-
+                list.add(cursor.next().toJson());
             }
 
         } finally {
             cursor.close();
         }
 
-        return items;
+        StringBuilder builder = new StringBuilder();
+        for (String aList : list) {
+            builder.append(aList);
+        }
+
+        return builder.toString();
     }
 
     /**
@@ -157,7 +164,7 @@ public class MongoDB {
         userCollection.insertOne(insertDoc);
     }
 
-    public void updateItem( Item item ) {
+    public static void updateItem( Item item ) {
         itemCollection.updateOne(eq("id", item.getId()),
                 new Document("$set", new Document("id", item.getId())
                                                 .append("deleted", item.isDeleted()) // Default value when created
@@ -176,7 +183,7 @@ public class MongoDB {
                                                 .append("descendants", item.getDescendants())));
     }
 
-    public void updateUser( User user ) {
+    public static void updateUser( User user ) {
         userCollection.updateOne(eq("id", user.getId()),
                 new Document("$set", new Document("id", user.getId())
                                                 .append("delay", user.getDelay())
