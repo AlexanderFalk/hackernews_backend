@@ -1,7 +1,5 @@
 package Model;
 
-import sun.tools.tree.Node;
-
 import java.util.List;
 
 /**
@@ -19,14 +17,56 @@ public class Item {
     private String timestamp;
     private String text;
     private boolean dead;
-    private Node parent;
+    private int parent;
     private List<Integer> poll;
-    private Node kids;
+    private List<Integer> kids;
     private String url;
     private int score;
     private String title;
     private List<Integer> parts;
     private int descendants;
+
+    // First time item creation
+    public Item(int id, boolean deleted, String type, String by,
+                String timestamp, String text, boolean dead,
+                int parent,
+                String url, int score, String title) {
+
+        this.id = id;
+        this.deleted = deleted;
+        this.type = type;
+        this.by = by;
+        this.timestamp = timestamp;
+        this.text = text;
+        this.dead = dead;
+        this.parent = parent;
+        this.url = url;
+        this.score = score;
+        this.title = title;
+    }
+
+    public Item(int id, boolean deleted, String type, String by,
+                String timestamp, String text, boolean dead,
+                int parent, List<Integer> poll, List<Integer> kids,
+                String url, int score, String title, List<Integer> parts,
+                int descendants) {
+
+        this.id = id;
+        this.deleted = deleted;
+        this.type = type;
+        this.by = by;
+        this.timestamp = timestamp;
+        this.text = text;
+        this.dead = dead;
+        this.parent = parent;
+        this.poll = poll;
+        this.kids = kids;
+        this.url = url;
+        this.score = score;
+        this.title = title;
+        this.parts = parts;
+        this.descendants = descendants;
+    }
 
     public int getId() {
         return id;
@@ -84,11 +124,11 @@ public class Item {
         this.dead = dead;
     }
 
-    public Node getParent() {
+    public int getParent() {
         return parent;
     }
 
-    public void setParent(Node parent) {
+    public void setParent(int parent) {
         this.parent = parent;
     }
 
@@ -100,11 +140,11 @@ public class Item {
         this.poll = poll;
     }
 
-    public Node getKids() {
+    public List<Integer> getKids() {
         return kids;
     }
 
-    public void setKids(Node kids) {
+    public void setKids(List<Integer> kids) {
         this.kids = kids;
     }
 

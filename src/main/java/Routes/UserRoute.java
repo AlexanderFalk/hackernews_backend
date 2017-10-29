@@ -1,7 +1,9 @@
 package Routes;
 
+import DataAccess.MongoDB;
 import Model.User;
 import io.swagger.annotations.Api;
+import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -96,6 +98,16 @@ public class UserRoute {
                 .add("karma", karma)
                 .add("submitted", submitted)
                 .build();
+
+        Document document = new Document("id", id)
+                .append("created", created)
+                .append("delay", delay)
+                .append("about", about)
+                .append("karma", karma)
+                .append("submitted", submitted);
+
+        MongoDB.insertUser(document);
+        System.out.println("Inserting user");
 
         User user = new User();
         user.setAbout(about);

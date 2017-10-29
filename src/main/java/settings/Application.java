@@ -2,6 +2,7 @@ package settings;
 
 import Model.User;
 import Routes.App;
+import Routes.ItemRoute;
 import Routes.UserRoute;
 import org.json.JSONObject;
 
@@ -20,6 +21,7 @@ public class Application extends javax.ws.rs.core.Application {
         final Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add( App.class );
         classes.add( UserRoute.class );
+        classes.add( ItemRoute.class );
         return classes;
     }
 

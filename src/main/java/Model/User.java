@@ -9,6 +9,7 @@ public class User {
     private String created;
     private int karma;
     private String about;
+    private List<Integer> submitted;
 
     public String getId() {
         return id;
@@ -58,6 +59,6 @@ public class User {
         this.submitted = submitted;
     }
 
-    private List<Integer> submitted;
+
 
 }

@@ -2,11 +2,16 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -14,22 +19,29 @@ import static com.mongodb.client.model.Filters.eq;
 public class MongoDB {
 
     // Setup of MONGO DB
-    private MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017");
-    private MongoClient client = new MongoClient(connectionString);
+    private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017");
+    private static MongoClient client = new MongoClient(connectionString);
 
     // Access Database
-    private MongoDatabase database = client.getDatabase("hackernews");
+    private static MongoDatabase database = client.getDatabase("hackernews");
     // Access collection
-    private MongoCollection<Document> itemCollection = database.getCollection("item");
-    private MongoCollection<Document> userCollection = database.getCollection("user");
+    private static MongoCollection<Document> itemCollection = database.getCollection("item");
+    private static MongoCollection<Document> userCollection = database.getCollection("user");
 
+
+    static Block<Document> printBlock = new Block<Document>() {
+        @Override
+        public void apply(final Document document) {
+
+        }
+    };
 
     /**
      *
      * @param userId - The user that you want to search for
      * @return JSON Object of the searched user
      */
-    public String getUser( String userId ) {
+    public static String getUser( String userId ) {
         // Creates a new Document to be returned
         Document document = userCollection
                             .find(eq("id", userId))
@@ -42,7 +54,7 @@ public class MongoDB {
      * This method intends to return all users in one request
      * @return
      */
-    public String getUsers() {
+    public static String getUsers() {
         // Creates a new Document to be returned as a JSON
         Document document = null;
         for (Document doc : userCollection.find()) {
@@ -76,7 +88,48 @@ public class MongoDB {
         itemCollection.insertOne(doc);
     }*/
 
-    public void insertItem( Document document ) {
+    /**
+     * This method intends to retrieve a single item from the collection
+     * @param ID - The ID of the item that wants to be retrieved
+     * @return The found item in JSON format
+     */
+    public static String getItem(int ID) {
+        // Creates a new Document to be returned
+        Document document = itemCollection
+                .find(eq("id", ID))
+                .first();
+
+        return document.toJson();
+    }
+
+    /**
+     * This method is used to retrieve all the items in a item collection
+     * @return - A document with all items
+     */
+    // NOT WORKING - STILL TRYING
+    public static String getItems() {
+
+        String items = "";
+        MongoCursor<Document> cursor = itemCollection.find().iterator();
+        try {
+            
+            while (cursor.hasNext()) {
+                items = cursor.next().toJson();
+
+            }
+
+        } finally {
+            cursor.close();
+        }
+
+        return items;
+    }
+
+    /**
+     * This method is used to insert item
+     * @param document - This parameter is the document pushed from the POST request
+     */
+    public static void insertItem( Document document ) {
         Document doc = new Document(document);
 
         itemCollection.insertOne(doc);
@@ -98,7 +151,7 @@ public class MongoDB {
         userCollection.insertOne(doc);
     }*/
 
-    public void insertUser( Document document) {
+    public static void insertUser( Document document) {
         Document insertDoc = new Document(document);
 
         userCollection.insertOne(insertDoc);
