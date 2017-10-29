@@ -2,8 +2,10 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.Item;
+import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import io.swagger.annotations.Api;
 import org.bson.Document;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.print.attribute.standard.Media;
@@ -69,6 +71,10 @@ public class ItemRoute {
                 object.getString("title")
         );
 
+        //Updates the Users submitted items in the database.
+        Document userDoc = MongoDB.getUserDocument(object.getString("by"));
+        userDoc.append("submitted", object.getInt("id"));
+
         Document itemDocument = new Document("id", item.getId())
                 .append("deleted", item.isDeleted())
                 .append("type", item.getType())
@@ -85,10 +91,14 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
+        MongoDB.insertUser(userDoc);
         MongoDB.insertItem(itemDocument);
+
 
         return Response.status(200).entity(itemDocument).build();
     }
+
+
 
 
 

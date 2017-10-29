@@ -42,7 +42,10 @@ public class UserRoute {
         user.setDelay("");
         user.setAbout("About foo");
         user.setKarma(125);
-        user.setSubmitted(Arrays.asList(1, 2, 3));
+        JSONArray submitted = new JSONArray();
+        submitted.put(1);
+        submitted.put(2);
+        user.setSubmitted(submitted);
 
         //Test data 2
         User secondUser = new User();
@@ -51,7 +54,10 @@ public class UserRoute {
         secondUser.setDelay("");
         secondUser.setAbout("About bar");
         secondUser.setKarma(225);
-        secondUser.setSubmitted(Arrays.asList(4, 5, 6));
+        JSONArray secondSubmitted = new JSONArray();
+        secondSubmitted.put(3);
+        secondSubmitted.put(4);
+        secondUser.setSubmitted(secondSubmitted);
 
         userMap.put(user.getId(), user);
         userMap.put(secondUser.getId(), secondUser);
@@ -120,17 +126,17 @@ public class UserRoute {
                 .append("submitted", submitted);
 
         MongoDB.insertUser(document);
-        System.out.println("Inserting user");
+        System.out.println("Inserting user...");
 
-        User user = new User();
-        user.setAbout(about);
-        user.setCreated(created);
-        user.setDelay(delay);
-        user.setId(id);
-        user.setKarma(karma);
-        user.setSubmitted(Arrays.asList(1, 2, 3, 4));
-
-        userMap.put(user.getId(), user);
+//        User user = new User();
+//        user.setAbout(about);
+//        user.setCreated(created);
+//        user.setDelay(delay);
+//        user.setId(id);
+//        user.setKarma(karma);
+//        user.setSubmitted(Arrays.asList(1, 2, 3, 4));
+//
+//        userMap.put(user.getId(), user);
 
         return Response.ok().entity(values.toString()).build();
 

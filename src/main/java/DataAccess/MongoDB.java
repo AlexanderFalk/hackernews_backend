@@ -50,6 +50,15 @@ public class MongoDB {
         return document.toJson();
     }
 
+    public static Document getUserDocument(String userId ){
+        //Creates a new Document to be returned
+        Document document = userCollection
+                .find(eq("id", userId))
+                .first();
+
+        return document;
+    }
+
     /**
      * This method intends to return all users in one request
      * @return
@@ -184,6 +193,20 @@ public class MongoDB {
                                                 .append("karma", user.getKarma())
                                                 .append("about", user.getAbout())
                                                 .append("submitted", user.getSubmitted())));
+    }
+
+    /**
+     * Updates the stored User with input User Document.
+     * @param userDocument that contains data to override stored user with.
+     */
+    public void updateUser ( Document userDocument ){
+        userCollection.updateOne(eq("id", userDocument.get("id")),
+                new Document("$set", new Document("id", userDocument.get("id"))
+                        .append("delay", userDocument.get("delay"))
+                        .append("created", userDocument.get("created"))
+                        .append("karma", userDocument.get("karma"))
+                        .append("about", userDocument.get("about"))
+                        .append("submitted", userDocument.get("submitted"))));
     }
 
     public void deleteItem( Item item ) {
