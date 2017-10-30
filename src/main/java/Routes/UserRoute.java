@@ -34,29 +34,29 @@ public class UserRoute {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("id") String id) {
 
-        //Test data 1
-        User user = new User();
-        user.setId("foo");
-        user.setCreated("");
-        user.setDelay("");
-        user.setAbout("About foo");
-        user.setKarma(125);
-        JSONArray submitted = new JSONArray();
-        submitted.put(1);
-        submitted.put(2);
-        user.setSubmitted(submitted);
-
-        //Test data 2
-        User secondUser = new User();
-        secondUser.setId("bar");
-        secondUser.setCreated("");
-        secondUser.setDelay("");
-        secondUser.setAbout("About bar");
-        secondUser.setKarma(225);
-        JSONArray secondSubmitted = new JSONArray();
-        secondSubmitted.put(3);
-        secondSubmitted.put(4);
-        secondUser.setSubmitted(secondSubmitted);
+//        //Test data 1
+//        User user = new User();
+//        user.setId("foo");
+//        user.setCreated("");
+//        user.setDelay("");
+//        user.setAbout("About foo");
+//        user.setKarma(125);
+//        JSONArray submitted = new JSONArray();
+//        submitted.put(1);
+//        submitted.put(2);
+//        user.setSubmitted(submitted);
+//
+//        //Test data 2
+//        User secondUser = new User();
+//        secondUser.setId("bar");
+//        secondUser.setCreated("");
+//        secondUser.setDelay("");
+//        secondUser.setAbout("About bar");
+//        secondUser.setKarma(225);
+//        JSONArray secondSubmitted = new JSONArray();
+//        secondSubmitted.put(3);
+//        secondSubmitted.put(4);
+//        secondUser.setSubmitted(secondSubmitted);
 
 //        userMap.put(user.getId(), user);
 //        userMap.put(secondUser.getId(), secondUser);
@@ -64,16 +64,21 @@ public class UserRoute {
 //        User foundUser = userMap.get(id);
         JSONObject foundUser = new JSONObject(MongoDB.getUser(id ));
 
-        JsonObject jsonObject = Json.createObjectBuilder()
-                .add("about", foundUser.getString("about"))
-                .add("created", foundUser.getString("created"))
-                .add("delay", foundUser.getString("delay"))
-                .add("id", foundUser.getString("id"))
-                .add("karma", foundUser.getInt("karma"))
-                .add("submitted", foundUser.getJSONArray("submitted").toString())
-                .build();
+//        JSONArray jsonArray = new JSONArray();
+//        for (Object obj : foundUser.getJSONArray("submitted")){
+//            jsonArray.put(obj);
+//        }
+//
+//        JsonObject jsonObject = Json.createObjectBuilder()
+//                .add("about", foundUser.getString("about"))
+//                .add("created", foundUser.getString("created"))
+//                .add("delay", foundUser.getString("delay"))
+//                .add("id", foundUser.getString("id"))
+//                .add("karma", foundUser.getInt("karma"))
+//                .add("submitted", JSONArray)
+//                .build();
 
-        return Response.ok().entity(jsonObject.toString()).build();
+        return Response.ok().entity(foundUser.toString()).build();
     }
 
     @POST
@@ -110,6 +115,13 @@ public class UserRoute {
         }
 
 
+        //Correct format JsonArray
+        JsonArrayBuilder builder = Json.createArrayBuilder();
+        for(Object obj : submitted){
+            builder.add((int) obj);
+        }
+
+        JsonArray submittedCorrectFormat = builder.build();
 
         JsonObject values = Json.createObjectBuilder()
                 .add("about", about)
@@ -117,9 +129,8 @@ public class UserRoute {
                 .add("delay", delay)
                 .add("id", id)
                 .add("karma", karma)
+                .add("submitted", submittedCorrectFormat)
                 .build();
-
-
 
 
         Document document = new Document("id", id)
@@ -131,16 +142,6 @@ public class UserRoute {
 
         MongoDB.insertUser(document);
         System.out.println("Inserting user...");
-
-//        User user = new User();
-//        user.setAbout(about);
-//        user.setCreated(created);
-//        user.setDelay(delay);
-//        user.setId(id);
-//        user.setKarma(karma);
-//        user.setSubmitted(Arrays.asList(1, 2, 3, 4));
-//
-//        userMap.put(user.getId(), user);
 
         return Response.ok().entity(values.toString()).build();
 
