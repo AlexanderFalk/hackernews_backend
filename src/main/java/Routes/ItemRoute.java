@@ -29,7 +29,7 @@ public class ItemRoute {
     @Produces(MediaType.APPLICATION_JSON)
     public Response item() {
 
-        return Response.status(200).entity(MongoDB.getItems()).build();
+        return Response.status(200).entity(MongoDB.getAllItems()).build();
     }
 
     @GET

@@ -76,12 +76,12 @@ public class MongoDB {
 
         return document.toJson();
     }
-    
+
     /**
      * This method is used to retrieve all the items in the item collection
      * @return - A String which contains all the documents.
      */
-    public static String getItems() {
+    public static String getAllItems() {
 
         StringBuilder items = new StringBuilder();
         MongoCursor<Document> cursor = itemCollection.find().iterator();
@@ -102,6 +102,33 @@ public class MongoDB {
 
         return items.toString();
     }
+
+    /**
+     * This method is used to retrieve all the items in the item collection
+     * @return - A String which contains all the documents.
+     */
+    public static String getNewestItems() {
+
+        StringBuilder items = new StringBuilder();
+        MongoCursor<Document> cursor = itemCollection.find().iterator();
+        try {
+
+            items.append("[");
+            while (cursor.hasNext()) {
+
+                items.append(cursor.next().toJson());
+                if(cursor.hasNext()) {
+                    items.append(",");
+                }
+            }
+            items.append("]");
+        } finally {
+            cursor.close();
+        }
+
+        return items.toString();
+    }
+
     /**
      * This method is used to insert item
      * @param document - This parameter is the document pushed from the POST request
