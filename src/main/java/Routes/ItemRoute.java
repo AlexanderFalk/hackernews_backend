@@ -94,7 +94,7 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-
+        //Returns status code 409 conflict if item id already exists in the database.
         if (MongoDB.itemExists(item.getId()))
             return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
 
