@@ -51,7 +51,7 @@ public class ItemRoute {
         StringBuilder out = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             out.append(line);
         }
         reader.close();
@@ -72,11 +72,11 @@ public class ItemRoute {
                 object.getString("title")
         );
 
-          //Updates the Users submitted items in the database.
-          Document userDoc = MongoDB.getUserDocument(item.getBy());
-          ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
-          submitted.add(item.getId());
-          userDoc.put("submitted", submitted);
+        //(1 of 2) Updates the Users submitted items in the database
+        Document userDoc = MongoDB.getUserDocument(item.getBy());
+        ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
+        submitted.add(item.getId());
+        userDoc.put("submitted", submitted);
 
         Document itemDocument = new Document("id", item.getId())
                 .append("deleted", item.isDeleted())
@@ -94,24 +94,26 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-        MongoDB.updateUser(userDoc);
-        MongoDB.insertItem(itemDocument);
 
+        if (MongoDB.itemExists(item.getId()))
+            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
+        MongoDB.insertItem(itemDocument);
 
         return Response.status(200).entity(itemDocument).build();
     }
 
 
-
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateItem( InputStream stream ) throws IOException {
+    public Response updateItem(InputStream stream) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         StringBuilder out = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             out.append(line);
         }
         reader.close();
@@ -156,7 +158,6 @@ public class ItemRoute {
 
         return Response.ok().entity("{ Update : ok }").build();
     }
-
 
 
 }
