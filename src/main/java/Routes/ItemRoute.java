@@ -71,9 +71,9 @@ public class ItemRoute {
                 object.getString("title")
         );
 
-        //Updates the Users submitted items in the database.
-        Document userDoc = MongoDB.getUserDocument(object.getString("by"));
-        userDoc.append("submitted", object.getInt("id"));
+//        //Updates the Users submitted items in the database.
+//        Document userDoc = MongoDB.getUserDocument(object.getString("by"));
+//        userDoc.append("submitted", object.getInt("id"));
 
         Document itemDocument = new Document("id", item.getId())
                 .append("deleted", item.isDeleted())
@@ -91,7 +91,7 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-        MongoDB.updateUser(userDoc);
+        //MongoDB.updateUser(userDoc);
         MongoDB.insertItem(itemDocument);
 
 
