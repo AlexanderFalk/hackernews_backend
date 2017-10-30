@@ -21,5 +21,6 @@
 hs_err_pid*
 
 .idea/
+.idea/workspace.xml
 target/
 target/generated-sources/
