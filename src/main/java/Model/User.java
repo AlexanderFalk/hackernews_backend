@@ -1,5 +1,7 @@
 package Model;
 
+import org.json.JSONArray;
+
 import java.util.List;
 
 public class User {
@@ -9,7 +11,7 @@ public class User {
     private String created;
     private int karma;
     private String about;
-    private List<Integer> submitted;
+    private JSONArray submitted;
 
     public String getId() {
         return id;
@@ -51,11 +53,11 @@ public class User {
         this.about = about;
     }
 
-    public List<Integer> getSubmitted() {
+    public JSONArray getSubmitted() {
         return submitted;
     }
 
-    public void setSubmitted(List<Integer> submitted) {
+    public void setSubmitted(JSONArray submitted) {
         this.submitted = submitted;
     }
 
