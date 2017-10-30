@@ -28,14 +28,7 @@ public class MongoDB {
     private static MongoCollection<Document> itemCollection = database.getCollection("item");
     private static MongoCollection<Document> userCollection = database.getCollection("user");
 
-
-    static Block<Document> printBlock = new Block<Document>() {
-        @Override
-        public void apply(final Document document) {
-
-        }
-    };
-
+    
     /**
      *
      * @param userId - The user that you want to search for
