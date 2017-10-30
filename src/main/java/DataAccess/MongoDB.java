@@ -164,23 +164,23 @@ public class MongoDB {
         userCollection.insertOne(insertDoc);
     }
 
-    public static void updateItem( Item item ) {
-        itemCollection.updateOne(eq("id", item.getId()),
-                new Document("$set", new Document("id", item.getId())
-                                                .append("deleted", item.isDeleted()) // Default value when created
-                                                .append("type", item.getType())
-                                                .append("by", item.getBy())
-                                                .append("timestamp", item.getTimestamp())
-                                                .append("text", item.getText())
-                                                .append("dead", item.isDead())
-                                                .append("parent", item.getParent())
-                                                .append("poll", item.getPoll())
-                                                .append("kids", item.getKids())
-                                                .append("url", item.getUrl())
-                                                .append("score", item.getScore())
-                                                .append("title", item.getTitle())
-                                                .append("parts", item.getParts())
-                                                .append("descendants", item.getDescendants())));
+    public static void updateItem( Document item ) {
+        itemCollection.updateOne(eq("id", item.getInteger("id")),
+                new Document("$set", new Document("id", item.getInteger("id"))
+                                                .append("deleted", item.getBoolean("deleted")) // Default value when created
+                                                .append("type", item.getString("type"))
+                                                .append("by", item.getString("by"))
+                                                .append("timestamp", item.getString("timestamp"))
+                                                .append("text", item.getString("text"))
+                                                .append("dead", item.getBoolean("dead"))
+                                                .append("parent", item.getInteger("parent"))
+                                                .append("poll", item.get("poll"))
+                                                .append("kids", item.get("kids"))
+                                                .append("url", item.getString("url"))
+                                                .append("score", item.getInteger("score"))
+                                                .append("title", item.getString("title"))
+                                                .append("parts", item.get("parts"))
+                                                .append("descendants", item.getInteger("descendants"))));
     }
 
     public static void updateUser( User user ) {
