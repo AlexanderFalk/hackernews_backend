@@ -56,6 +56,7 @@ public class ItemRoute {
         }
         reader.close();
 
+        System.out.println(out.toString()); //For debugging purposes.
         JSONObject object = new JSONObject(out.toString());
         Item item = new Item(
                 object.getInt("id"),
@@ -71,9 +72,11 @@ public class ItemRoute {
                 object.getString("title")
         );
 
-//        //Updates the Users submitted items in the database.
-//        Document userDoc = MongoDB.getUserDocument(object.getString("by"));
-//        userDoc.append("submitted", object.getInt("id"));
+          //Updates the Users submitted items in the database.
+          Document userDoc = MongoDB.getUserDocument(item.getBy());
+          ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
+          submitted.add(item.getId());
+          userDoc.put("submitted", submitted);
 
         Document itemDocument = new Document("id", item.getId())
                 .append("deleted", item.isDeleted())
@@ -91,7 +94,7 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-        //MongoDB.updateUser(userDoc);
+        MongoDB.updateUser(userDoc);
         MongoDB.insertItem(itemDocument);
 
 
