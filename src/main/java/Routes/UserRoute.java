@@ -30,6 +30,12 @@ import java.util.List;
 public class UserRoute {
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsers(){
+        return Response.ok().entity(MongoDB.getUsers()).build();
+    }
+
+    @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("id") String id) {
@@ -62,7 +68,6 @@ public class UserRoute {
 //        userMap.put(secondUser.getId(), secondUser);
 //
 //        User foundUser = userMap.get(id);
-        JSONObject foundUser = new JSONObject(MongoDB.getUser(id));
 
 //        JSONArray jsonArray = new JSONArray();
 //        for (Object obj : foundUser.getJSONArray("submitted")){
@@ -78,7 +83,7 @@ public class UserRoute {
 //                .add("submitted", JSONArray)
 //                .build();
 
-        return Response.ok().entity(foundUser.toString()).build();
+        return Response.ok().entity(MongoDB.getUser(id)).build();
     }
 
     @POST
