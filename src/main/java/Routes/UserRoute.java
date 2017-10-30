@@ -29,8 +29,6 @@ import java.util.List;
 @Api(value = "/user", description = "")
 public class UserRoute {
 
-    private HashMap<String, User> userMap = new HashMap<>();
-
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
