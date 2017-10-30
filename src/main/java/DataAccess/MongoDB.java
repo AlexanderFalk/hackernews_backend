@@ -50,6 +50,15 @@ public class MongoDB {
         return document.toJson();
     }
 
+    public static Document getUserDocument(String userId ){
+        //Creates a new Document to be returned
+        Document document = userCollection
+                .find(eq("id", userId))
+                .first();
+
+        return document;
+    }
+
     /**
      * This method intends to return all users in one request
      * @return
@@ -157,7 +166,7 @@ public class MongoDB {
         userCollection.insertOne(insertDoc);
     }
 
-    public void updateItem( Item item ) {
+    public static void updateItem( Item item ) {
         itemCollection.updateOne(eq("id", item.getId()),
                 new Document("$set", new Document("id", item.getId())
                                                 .append("deleted", item.isDeleted()) // Default value when created
@@ -176,7 +185,7 @@ public class MongoDB {
                                                 .append("descendants", item.getDescendants())));
     }
 
-    public void updateUser( User user ) {
+    public static void updateUser( User user ) {
         userCollection.updateOne(eq("id", user.getId()),
                 new Document("$set", new Document("id", user.getId())
                                                 .append("delay", user.getDelay())
@@ -184,6 +193,20 @@ public class MongoDB {
                                                 .append("karma", user.getKarma())
                                                 .append("about", user.getAbout())
                                                 .append("submitted", user.getSubmitted())));
+    }
+
+    /**
+     * Updates the stored User with input User Document.
+     * @param userDocument that contains data to override stored user with.
+     */
+    public static void updateUser ( Document userDocument ){
+        userCollection.updateOne(eq("id", userDocument.get("id")),
+                new Document("$set", new Document("id", userDocument.get("id"))
+                        .append("delay", userDocument.get("delay"))
+                        .append("created", userDocument.get("created"))
+                        .append("karma", userDocument.get("karma"))
+                        .append("about", userDocument.get("about"))
+                        .append("submitted", userDocument.get("submitted"))));
     }
 
     public void deleteItem( Item item ) {
