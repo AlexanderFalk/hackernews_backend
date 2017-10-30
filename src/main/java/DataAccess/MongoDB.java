@@ -2,16 +2,13 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
-import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -28,7 +25,7 @@ public class MongoDB {
     private static MongoCollection<Document> itemCollection = database.getCollection("item");
     private static MongoCollection<Document> userCollection = database.getCollection("user");
 
-    
+
     /**
      *
      * @param userId - The user that you want to search for
@@ -66,30 +63,6 @@ public class MongoDB {
         return document.toJson();
     }
 
-
-    /*public void insertItem( Item item ) {
-        // Initialize new user
-        item = new Item();
-
-        Document doc = new Document("id", item.getId())
-                .append("deleted", false) // Default value when created
-                .append("type", item.getType())
-                .append("by", item.getBy())
-                .append("timestamp", item.getTimestamp())
-                .append("text", item.getText())
-                .append("dead", item.isDead())
-                .append("parent", item.getParent())
-                .append("poll", item.getPoll())
-                .append("kids", item.getKids())
-                .append("url", item.getUrl())
-                .append("score", 0)
-                .append("title", item.getTitle())
-                .append("parts", item.getParts())
-                .append("descendants", item.getDescendants());
-
-        itemCollection.insertOne(doc);
-    }*/
-
     /**
      * This method intends to retrieve a single item from the collection
      * @param ID - The ID of the item that wants to be retrieved
@@ -103,30 +76,32 @@ public class MongoDB {
 
         return document.toJson();
     }
-
+    
     /**
-     * This method is used to retrieve all the items in a item collection
-     * @return - A document with all items
+     * This method is used to retrieve all the items in the item collection
+     * @return - A String which contains all the documents.
      */
-    // NOT WORKING - STILL TRYING
     public static String getItems() {
 
-        String items = "";
+        StringBuilder items = new StringBuilder();
         MongoCursor<Document> cursor = itemCollection.find().iterator();
         try {
-            
+
+            items.append("[");
             while (cursor.hasNext()) {
-                items = cursor.next().toJson();
 
+                items.append(cursor.next().toJson());
+                if(cursor.hasNext()) {
+                    items.append(",");
+                }
             }
-
+            items.append("]");
         } finally {
             cursor.close();
         }
 
-        return items;
+        return items.toString();
     }
-
     /**
      * This method is used to insert item
      * @param document - This parameter is the document pushed from the POST request
@@ -137,45 +112,29 @@ public class MongoDB {
         itemCollection.insertOne(doc);
     }
 
-    /*public void insertUser( User user ) {
-
-        // Initialize new user
-        user = new User();
-
-        Document doc = new Document("id", user.getId())
-                    .append("delay", user.getDelay())
-                    .append("created", user.getCreated())
-                    .append("karma", user.getKarma())
-                    .append("about", user.getAbout())
-                    .append("submitted", user.getSubmitted());
-
-
-        userCollection.insertOne(doc);
-    }*/
-
     public static void insertUser( Document document) {
         Document insertDoc = new Document(document);
 
         userCollection.insertOne(insertDoc);
     }
 
-    public static void updateItem( Item item ) {
-        itemCollection.updateOne(eq("id", item.getId()),
-                new Document("$set", new Document("id", item.getId())
-                                                .append("deleted", item.isDeleted()) // Default value when created
-                                                .append("type", item.getType())
-                                                .append("by", item.getBy())
-                                                .append("timestamp", item.getTimestamp())
-                                                .append("text", item.getText())
-                                                .append("dead", item.isDead())
-                                                .append("parent", item.getParent())
-                                                .append("poll", item.getPoll())
-                                                .append("kids", item.getKids())
-                                                .append("url", item.getUrl())
-                                                .append("score", item.getScore())
-                                                .append("title", item.getTitle())
-                                                .append("parts", item.getParts())
-                                                .append("descendants", item.getDescendants())));
+    public static void updateItem( Document item ) {
+        itemCollection.updateOne(eq("id", item.getInteger("id")),
+                new Document("$set", new Document("id", item.getInteger("id"))
+                        .append("deleted", item.getBoolean("deleted")) // Default value when created
+                        .append("type", item.getString("type"))
+                        .append("by", item.getString("by"))
+                        .append("timestamp", item.getString("timestamp"))
+                        .append("text", item.getString("text"))
+                        .append("dead", item.getBoolean("dead"))
+                        .append("parent", item.getInteger("parent"))
+                        .append("poll", item.get("poll"))
+                        .append("kids", item.get("kids"))
+                        .append("url", item.getString("url"))
+                        .append("score", item.getInteger("score"))
+                        .append("title", item.getString("title"))
+                        .append("parts", item.get("parts"))
+                        .append("descendants", item.getInteger("descendants"))));
     }
 
     public static void updateUser( User user ) {

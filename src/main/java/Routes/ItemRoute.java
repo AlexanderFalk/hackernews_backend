@@ -100,6 +100,59 @@ public class ItemRoute {
 
 
 
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateItem( InputStream stream ) throws IOException {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder out = new StringBuilder();
+        String line;
+
+        while((line = reader.readLine()) != null) {
+            out.append(line);
+        }
+        reader.close();
+
+        JSONObject object = new JSONObject(out.toString());
+        Item item = new Item(
+                object.getInt("id"),
+                object.getBoolean("deleted"),
+                object.getString("type"),
+                object.getString("by"),
+                object.getString("timestamp"),
+                object.getString("text"),
+                object.getBoolean("dead"),
+                object.getInt("parent"),
+                object.getJSONArray("poll"),
+                object.getJSONArray("kids"),
+                object.getString("url"),
+                object.getInt("score"),
+                object.getString("title"),
+                object.getJSONArray("parts"),
+                object.getInt("descendants")
+        );
+
+        Document itemDocument = new Document("id", item.getId())
+                .append("deleted", item.isDeleted())
+                .append("type", item.getType())
+                .append("by", item.getBy())
+                .append("timestamp", item.getTimestamp())
+                .append("text", item.getText())
+                .append("dead", item.isDead())
+                .append("parent", item.getParent())
+                .append("poll", item.getPoll())
+                .append("kids", item.getKids())
+                .append("url", item.getUrl())
+                .append("score", item.getScore())
+                .append("title", item.getTitle())
+                .append("parts", item.getParts())
+                .append("descendants", item.getDescendants());
+
+
+        MongoDB.updateItem(itemDocument);
+
+        return Response.ok().entity("{ Update : ok }").build();
+    }
 
 
 
