@@ -3,10 +3,12 @@ package Routes;
 import DataAccess.MongoDB;
 import Model.User;
 import io.swagger.annotations.Api;
+import io.swagger.models.auth.In;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import settings.Application;
 
 import javax.json.*;
 import javax.print.attribute.standard.Media;
@@ -26,8 +28,6 @@ import java.util.List;
 @Path("/user")
 @Api(value = "/user", description = "")
 public class UserRoute {
-
-    private HashMap<String, User> userMap = new HashMap<>();
 
     @GET
     @Path("/{id}")
@@ -145,6 +145,57 @@ public class UserRoute {
 
         return Response.ok().entity(values.toString()).build();
 
+    }
+
+    /**
+     * Updates an existing user in the database.
+     * @param id of the User to change.
+     * @return Appropriate Response code.
+     */
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateUser(@PathParam("id") String id, InputStream json) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(json));
+        StringBuilder out = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            out.append(line);
+        }
+        reader.close();
+
+        JSONObject jsonObject = null;
+        String about = null;
+        String created = null;
+        String delay = null;
+        String inputId = null;
+        int karma = 0;
+        JSONArray submitted = null;
+
+        try{
+            jsonObject = new JSONObject(out.toString());
+            about = jsonObject.getString("about");
+            created = jsonObject.getString("created");
+            delay = jsonObject.getString("delay");
+            karma = jsonObject.getInt("karma");
+            submitted = jsonObject.getJSONArray("submitted");
+        }
+        catch (JSONException ex){
+            ex.printStackTrace();
+        }
+
+        Document userToUpdate = MongoDB.getUserDocument(id);
+        userToUpdate.put("about", about);
+        userToUpdate.put("created", created);
+        userToUpdate.put("delay", delay);
+        userToUpdate.put("karma", karma);
+        userToUpdate.put("submitted", submitted);
+
+        MongoDB.updateUser(userToUpdate);
+        System.out.println("Updating user...");
+
+        return Response.ok().entity(userToUpdate.toJson()).build();
     }
 
 
