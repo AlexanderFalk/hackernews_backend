@@ -2,18 +2,17 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
-import com.mongodb.*;
-import com.mongodb.client.FindIterable;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-
-import java.util.*;
+import org.bson.conversions.Bson;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.in;
-import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.util.JSON.parse;
 
 
 public class MongoDB {
@@ -27,8 +26,6 @@ public class MongoDB {
     // Access collection
     private static MongoCollection<Document> itemCollection = database.getCollection("item");
     private static MongoCollection<Document> userCollection = database.getCollection("user");
-    private static MongoCollection<Document> counterCollection = database.getCollection("sequence");
-
 
     /**
      * @param userId - The user that you want to search for
@@ -90,30 +87,6 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
 
-    /**
-     * This method is used to retrieve all the items in the item collection
-     * @return - A String which contains all the documents.
-     */
-    /*public static String getNewestItems() {
-
-        StringBuilder items = new StringBuilder();
-        Block<Document> printBlock = new Block<Document>() {
-            @Override
-            public void apply(final Document document) {
-                System.out.println(document.toJson());
-                items.append(cursor.next().toJson());
-                if (cursor.hasNext()) {
-                    items.append(",");
-                }
-            }
-        };
-        MongoCursor<Document> cursor = itemCollection.find()
-                                        .sort(new BasicDBObject("timestamp", -1)).forEach(printBlock);
-
-        return iterateCollection(items, cursor);
-    }
-<<<<<<< HEAD
-    */
     /**
      * This method is used to insert item
      *
@@ -213,7 +186,36 @@ public class MongoDB {
 
     }
 
-    public void addComment(Item item, User user) {
+    /**
+     * The method pushes a new item into its parent.
+     * Each comment is a kid to a post.
+     * @param parentID - The parent ID
+     * @param kidID - The comments ID / new item
+     */
+    public static void addComment( int parentID, int kidID ) {
+        // Finds parent document to look at attribute 'kids' value
+        Document document = itemCollection.find(eq("id", parentID)).first();
+
+        // The queries
+        String jsonPush = "{$push:{kids:"+ kidID +"}}";
+        String jsonSet = "{$set:{kids:["+ kidID +"]}}";
+
+        // parsed
+
+
+
+
+        // First time insert of kid
+        if (document.get("kids") == null) {
+            DBObject set = (DBObject) parse(jsonSet);
+            itemCollection.updateOne(eq("id", parentID),
+                    (Bson) set);
+        }
+        // Continous push to array
+        else {
+            DBObject push = (DBObject) parse(jsonPush);
+            itemCollection.updateOne(eq("id", parentID), (Bson) push);
+        }
 
     }
 

@@ -145,7 +145,6 @@ public class ItemRoute {
         return Response.status(200).entity(itemDocument.toJson()).build();
     }
 
-
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateItem(InputStream stream) throws IOException {
@@ -199,4 +198,90 @@ public class ItemRoute {
 
         return Response.ok().entity("{ Update : ok }").build();
     }
+
+
+    @POST
+    @Path("{itemId}/comment")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "POST",
+            value = "Creates a comment to its parent",
+            notes = "You can create a comment by posting HTTP Body as shown in the documentation",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200, message = "A new comment has been added to its parent"),
+                    @ApiResponse(code = 400, message = "Bad request. Check your payload"),
+                    @ApiResponse(code = 409, message = "Indicating that the request could not be proceeded. " +
+                            "Possible an item with same ID")
+            })
+    public Response comment(InputStream json, @PathParam("itemId") int parentID) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(json));
+        StringBuilder out = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            out.append(line);
+        }
+        reader.close();
+
+        // Generating timestamp
+        String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
+
+        // Get latest ItemID and increment with one
+        int newID = MongoDB.findLatestItem();
+
+        JSONObject object = new JSONObject(out.toString());
+        Item item = new Item(
+                newID,
+                object.getBoolean("deleted"),
+                object.getString("type"),
+                object.getString("by"),
+                timestamp,
+                object.getString("text"),
+                object.getBoolean("dead"),
+                parentID,
+                object.getString("url"),
+                object.getInt("score"),
+                object.getString("title")
+        );
+
+        //(1 of 2) Updates the Users submitted items in the database
+        Document userDoc = MongoDB.getUserDocument(item.getBy());
+        ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
+        submitted.add(item.getId());
+        userDoc.put("submitted", submitted);
+
+        Document itemDocument = new Document("id", item.getId())
+                .append("deleted", item.isDeleted())
+                .append("type", item.getType())
+                .append("by", item.getBy())
+                .append("timestamp", item.getTimestamp())
+                .append("text", item.getText())
+                .append("dead", item.isDead())
+                .append("parent", item.getParent())
+                .append("poll", item.getPoll())
+                .append("kids", item.getKids())
+                .append("url", item.getUrl())
+                .append("score", item.getScore())
+                .append("title", item.getTitle())
+                .append("parts", item.getParts())
+                .append("descendants", item.getDescendants());
+
+        //Returns status code 409 conflict if item id already exists in the database.
+        if (MongoDB.itemExists(item.getId()))
+            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
+        // Inserts the item into the database
+        MongoDB.insertItem(itemDocument);
+
+        // Updates the parent item's attribute: Kids[]
+        MongoDB.addComment(parentID, newID);
+
+        return Response.status(200).entity(itemDocument.toJson()).build();
+    }
+
+
 }

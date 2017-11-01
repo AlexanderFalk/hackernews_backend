@@ -13,14 +13,14 @@ import java.util.Set;
 //The java class declares root resource and provider classes
 public class Application extends javax.ws.rs.core.Application {
 
-    /*public Application() {
+    public Application() {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0.0");
         beanConfig.setContact("Alexander Falk - alexfalk7@gmail.com");
         beanConfig.setTitle("Hackernews API");
         beanConfig.setResourcePackage("Routes");
-        beanConfig.setScan(true);
-    }*/
+        beanConfig.setBasePath("/api");
+    }
 
     //The method returns a non-empty collection with classes, that must be included in the published JAX-RS application
     @Override
@@ -29,8 +29,8 @@ public class Application extends javax.ws.rs.core.Application {
         classes.add( App.class );
         classes.add( UserRoute.class );
         classes.add( ItemRoute.class );
-        //classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-        //classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+        classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         return classes;
     }
 
