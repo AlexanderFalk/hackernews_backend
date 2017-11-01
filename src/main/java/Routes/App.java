@@ -44,6 +44,7 @@ public class App {
      * @return "Alive", if up-and-running. "Update" if down for maintenance. "Down" for the system being down.
      */
     @GET
+    @Path("/status")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getStatus(){
         return Response.ok().entity(Status.Alive.toString()).build(); //If this statement can be executed - the server is up and running.
