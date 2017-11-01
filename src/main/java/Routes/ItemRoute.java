@@ -2,16 +2,13 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.Item;
-import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.bson.Document;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Path("/item")
 @Api(value = "/item", description = "Here you will find operations about items",
@@ -77,14 +72,14 @@ public class ItemRoute {
         StringBuilder out = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             out.append(line);
         }
         reader.close();
 
         // Generating timestamp
         String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
-
+        System.out.println(out.toString()); //For debugging purposes.
         JSONObject object = new JSONObject(out.toString());
         Item item = new Item(
                 object.getInt("id"),
@@ -100,9 +95,11 @@ public class ItemRoute {
                 object.getString("title")
         );
 
-//        //Updates the Users submitted items in the database.
-//        Document userDoc = MongoDB.getUserDocument(object.getString("by"));
-//        userDoc.append("submitted", object.getInt("id"));
+        //(1 of 2) Updates the Users submitted items in the database
+        Document userDoc = MongoDB.getUserDocument(item.getBy());
+        ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
+        submitted.add(item.getId());
+        userDoc.put("submitted", submitted);
 
         Document itemDocument = new Document("id", item.getId())
                 .append("deleted", item.isDeleted())
@@ -120,24 +117,26 @@ public class ItemRoute {
                 .append("parts", item.getParts())
                 .append("descendants", item.getDescendants());
 
-        //MongoDB.updateUser(userDoc);
-        MongoDB.insertItem(itemDocument);
+        //Returns status code 409 conflict if item id already exists in the database.
+        if (MongoDB.itemExists(item.getId()))
+            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
 
+        MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
+        MongoDB.insertItem(itemDocument);
 
         return Response.status(200).entity(itemDocument).build();
     }
 
 
-
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateItem( InputStream stream ) throws IOException {
+    public Response updateItem(InputStream stream) throws IOException {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         StringBuilder out = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             out.append(line);
         }
         reader.close();
@@ -182,7 +181,6 @@ public class ItemRoute {
 
         return Response.ok().entity("{ Update : ok }").build();
     }
-
 
 
 }

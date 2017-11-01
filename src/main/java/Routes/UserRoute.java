@@ -30,6 +30,12 @@ import java.util.List;
 public class UserRoute {
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsers(){
+        return Response.ok().entity(MongoDB.getUsers()).build();
+    }
+
+    @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("id") String id) {
@@ -62,7 +68,6 @@ public class UserRoute {
 //        userMap.put(secondUser.getId(), secondUser);
 //
 //        User foundUser = userMap.get(id);
-        JSONObject foundUser = new JSONObject(MongoDB.getUser(id ));
 
 //        JSONArray jsonArray = new JSONArray();
 //        for (Object obj : foundUser.getJSONArray("submitted")){
@@ -78,7 +83,7 @@ public class UserRoute {
 //                .add("submitted", JSONArray)
 //                .build();
 
-        return Response.ok().entity(foundUser.toString()).build();
+        return Response.ok().entity(MongoDB.getUser(id)).build();
     }
 
     @POST
@@ -101,7 +106,7 @@ public class UserRoute {
         int karma = 0;
         JSONArray submitted = null;
 
-        try{
+        try {
             jsonObject = new JSONObject(out.toString());
             about = jsonObject.getString("about");
             created = jsonObject.getString("created");
@@ -109,15 +114,14 @@ public class UserRoute {
             id = jsonObject.getString("id");
             karma = jsonObject.getInt("karma");
             submitted = jsonObject.getJSONArray("submitted");
-        }
-        catch (JSONException ex){
+        } catch (JSONException ex) {
             ex.printStackTrace();
         }
 
 
         //Correct format JsonArray
         JsonArrayBuilder builder = Json.createArrayBuilder();
-        for(Object obj : submitted){
+        for (Object obj : submitted) {
             builder.add((int) obj);
         }
 
@@ -140,6 +144,10 @@ public class UserRoute {
                 .append("karma", karma)
                 .append("submitted", submitted);
 
+        //Returns status code 409 conflict if user id already exists in the database.
+        if (MongoDB.userExists(id))
+            return Response.status(409).entity("CONFLICT! User with the specified ID already exists.").build();
+
         MongoDB.insertUser(document);
         System.out.println("Inserting user...");
 
@@ -149,6 +157,7 @@ public class UserRoute {
 
     /**
      * Updates an existing user in the database.
+     *
      * @param id of the User to change.
      * @return Appropriate Response code.
      */
@@ -173,15 +182,14 @@ public class UserRoute {
         int karma = 0;
         JSONArray submitted = null;
 
-        try{
+        try {
             jsonObject = new JSONObject(out.toString());
             about = jsonObject.getString("about");
             created = jsonObject.getString("created");
             delay = jsonObject.getString("delay");
             karma = jsonObject.getInt("karma");
             submitted = jsonObject.getJSONArray("submitted");
-        }
-        catch (JSONException ex){
+        } catch (JSONException ex) {
             ex.printStackTrace();
         }
 
