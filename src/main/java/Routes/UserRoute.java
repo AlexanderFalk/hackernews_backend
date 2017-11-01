@@ -46,6 +46,7 @@ public class UserRoute {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response postUser(InputStream json) throws IOException, JSONException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
@@ -128,6 +129,7 @@ public class UserRoute {
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(@PathParam("id") String id, InputStream json) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
