@@ -76,7 +76,7 @@ public class ItemRoute {
             responseContainer = "JSON")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 201, message = "A new item has been created"),
+                    @ApiResponse(code = 200, message = "A new item has been created"),
                     @ApiResponse(code = 400, message = "Bad request. Check your payload"),
                     @ApiResponse(code = 409, message = "Indicating that the request could not be proceeded. " +
                             "Possible an item with same ID")
@@ -86,10 +86,6 @@ public class ItemRoute {
         StringBuilder out = new StringBuilder();
         String line;
 
-        if(reader.readLine().isEmpty()) {
-            return Response.status(400).build();
-
-        }
 
         while ((line = reader.readLine()) != null) {
             out.append(line);
@@ -102,7 +98,6 @@ public class ItemRoute {
         // Get latest ItemID and increment with one
         int id = MongoDB.findLatestItem();
 
-        System.out.println(out.toString()); //For debugging purposes.
         JSONObject object = new JSONObject(out.toString());
         Item item = new Item(
                 id,
@@ -147,7 +142,7 @@ public class ItemRoute {
         MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
         MongoDB.insertItem(itemDocument);
 
-        return Response.status(201).entity(itemDocument).build();
+        return Response.status(200).entity(itemDocument.toJson()).build();
     }
 
 

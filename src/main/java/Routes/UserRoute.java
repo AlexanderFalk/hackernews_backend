@@ -2,12 +2,14 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.User;
+import com.sun.org.apache.bcel.internal.util.BCELifier;
 import io.swagger.annotations.Api;
 import io.swagger.models.auth.In;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mindrot.jbcrypt.BCrypt;
 import settings.Application;
 
 import javax.json.*;
@@ -39,50 +41,6 @@ public class UserRoute {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("id") String id) {
-
-//        //Test data 1
-//        User user = new User();
-//        user.setId("foo");
-//        user.setCreated("");
-//        user.setDelay("");
-//        user.setAbout("About foo");
-//        user.setKarma(125);
-//        JSONArray submitted = new JSONArray();
-//        submitted.put(1);
-//        submitted.put(2);
-//        user.setSubmitted(submitted);
-//
-//        //Test data 2
-//        User secondUser = new User();
-//        secondUser.setId("bar");
-//        secondUser.setCreated("");
-//        secondUser.setDelay("");
-//        secondUser.setAbout("About bar");
-//        secondUser.setKarma(225);
-//        JSONArray secondSubmitted = new JSONArray();
-//        secondSubmitted.put(3);
-//        secondSubmitted.put(4);
-//        secondUser.setSubmitted(secondSubmitted);
-
-//        userMap.put(user.getId(), user);
-//        userMap.put(secondUser.getId(), secondUser);
-//
-//        User foundUser = userMap.get(id);
-
-//        JSONArray jsonArray = new JSONArray();
-//        for (Object obj : foundUser.getJSONArray("submitted")){
-//            jsonArray.put(obj);
-//        }
-//
-//        JsonObject jsonObject = Json.createObjectBuilder()
-//                .add("about", foundUser.getString("about"))
-//                .add("created", foundUser.getString("created"))
-//                .add("delay", foundUser.getString("delay"))
-//                .add("id", foundUser.getString("id"))
-//                .add("karma", foundUser.getInt("karma"))
-//                .add("submitted", JSONArray)
-//                .build();
-
         return Response.ok().entity(MongoDB.getUser(id)).build();
     }
 
@@ -99,6 +57,7 @@ public class UserRoute {
         reader.close();
 
         JSONObject jsonObject = null;
+        String password = null;
         String about = null;
         String created = null;
         String delay = null;
@@ -109,6 +68,7 @@ public class UserRoute {
         try {
             jsonObject = new JSONObject(out.toString());
             about = jsonObject.getString("about");
+            password = jsonObject.getString("password");
             created = jsonObject.getString("created");
             delay = jsonObject.getString("delay");
             id = jsonObject.getString("id");
@@ -116,6 +76,7 @@ public class UserRoute {
             submitted = jsonObject.getJSONArray("submitted");
         } catch (JSONException ex) {
             ex.printStackTrace();
+            return Response.status(400).entity(ex.getMessage()).build();
         }
 
 
@@ -129,6 +90,7 @@ public class UserRoute {
 
         JsonObject values = Json.createObjectBuilder()
                 .add("about", about)
+                .add("password", password)
                 .add("created", created)
                 .add("delay", delay)
                 .add("id", id)
@@ -136,11 +98,13 @@ public class UserRoute {
                 .add("submitted", submittedCorrectFormat)
                 .build();
 
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         Document document = new Document("id", id)
                 .append("created", created)
                 .append("delay", delay)
                 .append("about", about)
+                .append("password", hashedPassword)
                 .append("karma", karma)
                 .append("submitted", submitted);
 
@@ -176,15 +140,16 @@ public class UserRoute {
 
         JSONObject jsonObject = null;
         String about = null;
+        String password = null;
         String created = null;
         String delay = null;
-        String inputId = null;
         int karma = 0;
         JSONArray submitted = null;
 
         try {
             jsonObject = new JSONObject(out.toString());
             about = jsonObject.getString("about");
+            password = jsonObject.getString("password");
             created = jsonObject.getString("created");
             delay = jsonObject.getString("delay");
             karma = jsonObject.getInt("karma");
@@ -193,8 +158,11 @@ public class UserRoute {
             ex.printStackTrace();
         }
 
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
         Document userToUpdate = MongoDB.getUserDocument(id);
         userToUpdate.put("about", about);
+        userToUpdate.put("password", hashedPassword);
         userToUpdate.put("created", created);
         userToUpdate.put("delay", delay);
         userToUpdate.put("karma", karma);
