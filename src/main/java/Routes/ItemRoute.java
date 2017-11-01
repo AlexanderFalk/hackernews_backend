@@ -4,6 +4,9 @@ import DataAccess.MongoDB;
 import Model.Item;
 import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,26 +24,49 @@ import java.util.Arrays;
 import java.util.List;
 
 @Path("/item")
-@Api(value = "/item", description = "At this route you can " +
-        "GET an item, GET multiple items, or POST an item")
+@Api(value = "/item", description = "Here you will find operations about items",
+    consumes = "application/json", produces = "application/json")
 public class ItemRoute {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Finds all items",
+            notes = "Can be produced by making a GET request to /hackernews/item",
+            response = Item.class,
+            responseContainer = "String")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 204, message = "No content/items found"),
+                    @ApiResponse(code = 200, message = "All items has been retrieved")
+            })
     public Response item() {
-
+        if(MongoDB.getAllItems().isEmpty()) {
+            return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
+        }
         return Response.status(200).entity(MongoDB.getAllItems()).build();
     }
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Finds a specific item",
+            notes = "You can get a specific item by requesting to /hackernews/item/{id}",
+            response = Item.class,
+            responseContainer = "String")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 204, message = "(Content) Item ID not found"),
+                    @ApiResponse(code = 200, message = "Item ID found successfully")
+    })
     public Response item(@PathParam("id") int id) {
-        // Test data
-        /*Item item = new Item(1, false, "show",
-                "foo", "1509214365", "This is an item",
-                false, 1, Arrays.asList(0), Arrays.asList(2), "", 22,
-                "FIRST ITEM", Arrays.asList(0), 0);*/
+
+        if(MongoDB.getItem(id) == null) {
+            return Response.status(204).entity("Item not found").build();
+        }
         return Response.status(200).entity(MongoDB.getItem(id)).build();
     }
 
@@ -56,13 +82,16 @@ public class ItemRoute {
         }
         reader.close();
 
+        // Generating timestamp
+        String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
+
         JSONObject object = new JSONObject(out.toString());
         Item item = new Item(
                 object.getInt("id"),
                 object.getBoolean("deleted"),
                 object.getString("type"),
                 object.getString("by"),
-                object.getString("timestamp"),
+                timestamp,
                 object.getString("text"),
                 object.getBoolean("dead"),
                 object.getInt("parent"),

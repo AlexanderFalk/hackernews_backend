@@ -1,11 +1,9 @@
 package settings;
 
-import Model.User;
 import Routes.App;
 import Routes.ItemRoute;
 import Routes.UserRoute;
-import org.json.JSONObject;
-
+import io.swagger.jaxrs.config.BeanConfig;
 import javax.ws.rs.ApplicationPath;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +13,15 @@ import java.util.Set;
 //The java class declares root resource and provider classes
 public class Application extends javax.ws.rs.core.Application {
 
+    public Application() {
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setVersion("1.0.0");
+        beanConfig.setContact("Alexander Falk - alexfalk7@gmail.com");
+        beanConfig.setTitle("Hackernews API");
+        beanConfig.setResourcePackage("Routes");
+        beanConfig.setScan(true);
+    }
+
     //The method returns a non-empty collection with classes, that must be included in the published JAX-RS application
     @Override
     public Set<Class<?>> getClasses() {
@@ -22,6 +29,8 @@ public class Application extends javax.ws.rs.core.Application {
         classes.add( App.class );
         classes.add( UserRoute.class );
         classes.add( ItemRoute.class );
+        classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+        classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         return classes;
     }
 

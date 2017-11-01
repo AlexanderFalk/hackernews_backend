@@ -3,6 +3,7 @@ package DataAccess;
 import Model.Item;
 import Model.User;
 import com.mongodb.*;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -11,6 +12,7 @@ import org.bson.Document;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
 
 
 public class MongoDB {
@@ -85,50 +87,28 @@ public class MongoDB {
 
         StringBuilder items = new StringBuilder();
         MongoCursor<Document> cursor = itemCollection.find().iterator();
-        try {
-
-            items.append("[");
-            while (cursor.hasNext()) {
-
-                items.append(cursor.next().toJson());
-                if(cursor.hasNext()) {
-                    items.append(",");
-                }
-            }
-            items.append("]");
-        } finally {
-            cursor.close();
-        }
-
-        return items.toString();
+        return iterateCollection(items, cursor);
     }
 
     /**
      * This method is used to retrieve all the items in the item collection
      * @return - A String which contains all the documents.
      */
-    public static String getNewestItems() {
+    /*public static String getNewestItems() {
 
         StringBuilder items = new StringBuilder();
-        MongoCursor<Document> cursor = itemCollection.find().iterator();
-        try {
-
-            items.append("[");
-            while (cursor.hasNext()) {
-
-                items.append(cursor.next().toJson());
-                if(cursor.hasNext()) {
-                    items.append(",");
-                }
+        Block<Document> printBlock = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                System.out.println(document.toJson());
             }
-            items.append("]");
-        } finally {
-            cursor.close();
-        }
+        };
+        MongoCursor<Document> cursor = itemCollection.find()
+                                        .sort(new BasicDBObject("timestamp", -1)).forEach(printBlock);
 
-        return items.toString();
+        return iterateCollection(items, cursor);
     }
-
+    */
     /**
      * This method is used to insert item
      * @param document - This parameter is the document pushed from the POST request
@@ -202,5 +182,24 @@ public class MongoDB {
 
     public void addComment(Item item, User user) {
 
+    }
+
+
+    private static String iterateCollection(StringBuilder items, MongoCursor<Document> cursor) {
+        try {
+            items.append("[");
+            while (cursor.hasNext()) {
+
+                items.append(cursor.next().toJson());
+                if(cursor.hasNext()) {
+                    items.append(",");
+                }
+            }
+            items.append("]");
+        } finally {
+            cursor.close();
+        }
+
+        return items.toString();
     }
 }
