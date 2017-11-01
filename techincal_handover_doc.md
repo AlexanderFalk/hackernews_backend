@@ -44,7 +44,8 @@ Found a bug? Please create an issue [at the remote GitHub repository](https://gi
 The servers hosting the components reside here (refer to the [Credentials](#credentials) section to get login details):
 
 **Front-end**: is hosted by DigitalOcean, and resides [here](https://cloud.digitalocean.com/droplets/63474978/).
-**Back-end**: is hosted by ______, and resides [here](**Post link here**).
+
+**Back-end**: is hosted by Hetzner, and resides [here](https://www.hetzner.com/virtual-server/cx40).
 
 Restart each component from here. Alternatively, you can contact the authors of this document *or* create an issue on the [official repository](https://github.com/AlexanderFalk/hackernews_backend/issues) with the label "restart request" along with a description of why the restart is wanted.
 
