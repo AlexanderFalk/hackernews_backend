@@ -51,16 +51,25 @@ public class MongoDB {
     /**
      * This method intends to return all users in one request
      *
-     * @return
+     * @return a String which contains all User Documents.
      */
     public static String getUsers() {
-        // Creates a new Document to be returned as a JSON
-        Document document = null;
-        for (Document doc : userCollection.find()) {
-            document = doc;
+        StringBuilder users = new StringBuilder();
+        MongoCursor<Document> cursor = userCollection.find().iterator();
+        try {
+            users.append("[");
+            while (cursor.hasNext()) {
+                users.append(cursor.next().toJson());
+                if (cursor.hasNext()) {
+                    users.append(",");
+                }
+            }
+            users.append("]");
+        } finally {
+            cursor.close();
         }
 
-        return document.toJson();
+        return users.toString();
     }
 
     /**
@@ -168,6 +177,7 @@ public class MongoDB {
 
     /**
      * Checks if a User with the specified ID already exists in the database.
+     *
      * @param userId User ID to search for.
      * @return "True", if the user already exists. "False", if he doesn't.
      */
@@ -180,7 +190,7 @@ public class MongoDB {
 
     }
 
-    public static boolean itemExists( int itemId ){
+    public static boolean itemExists(int itemId) {
         Document document = itemCollection
                 .find(eq("id", itemId))
                 .first();
