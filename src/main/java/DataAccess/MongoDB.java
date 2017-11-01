@@ -12,6 +12,7 @@ import org.bson.Document;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 import static com.mongodb.client.model.Sorts.descending;
 
 
@@ -26,6 +27,7 @@ public class MongoDB {
     // Access collection
     private static MongoCollection<Document> itemCollection = database.getCollection("item");
     private static MongoCollection<Document> userCollection = database.getCollection("user");
+    private static MongoCollection<Document> counterCollection = database.getCollection("sequence");
 
 
     /**
@@ -58,20 +60,7 @@ public class MongoDB {
     public static String getUsers() {
         StringBuilder users = new StringBuilder();
         MongoCursor<Document> cursor = userCollection.find().iterator();
-        try {
-            users.append("[");
-            while (cursor.hasNext()) {
-                users.append(cursor.next().toJson());
-                if (cursor.hasNext()) {
-                    users.append(",");
-                }
-            }
-            users.append("]");
-        } finally {
-            cursor.close();
-        }
-
-        return users.toString();
+        return iterateCollection(users, cursor);
     }
 
     /**
@@ -131,6 +120,7 @@ public class MongoDB {
      * @param document - This parameter is the document pushed from the POST request
      */
     public static void insertItem(Document document) {
+
         Document doc = new Document(document);
 
         itemCollection.insertOne(doc);
@@ -225,6 +215,21 @@ public class MongoDB {
 
     }
 
+    /**
+     * This method intends to take the latest item number and increment it by one
+     * @return The return value is the latest item ID
+     */
+    public static int findLatestItem() {
+        MongoCursor<Document> cursor = itemCollection.find().iterator();
+
+        Document document = new Document();
+        while(cursor.hasNext()) {
+            document = cursor.next();
+        }
+
+        int lastID = document.getInteger("id");
+        return lastID + 1;
+    }
 
     private static String iterateCollection(StringBuilder items, MongoCursor<Document> cursor) {
         try {
