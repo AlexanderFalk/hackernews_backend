@@ -21,6 +21,15 @@ import java.io.InputStreamReader;
 public class App {
 
     /**
+     * The three states the server can be in.
+     */
+    enum Status{
+        Alive,
+        Update,
+        Dead
+    }
+
+    /**
      * @return List of the most popular posts
      */
     @GET
@@ -28,6 +37,16 @@ public class App {
     @Produces(MediaType.APPLICATION_JSON)
     public Response index(InputStream json) {
         return Response.ok().entity("Welcome!").status(200).build();
+    }
+
+    /**
+     * Gets the status of the server.
+     * @return "Alive", if up-and-running. "Update" if down for maintenance. "Down" for the system being down.
+     */
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getStatus(){
+        return Response.ok().entity(Status.Alive.toString()).build(); //If this statement can be executed - the server is up and running.
     }
 
     @POST
