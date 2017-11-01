@@ -7,6 +7,7 @@ import java.util.List;
 public class User {
 
     private String id;
+    private String password;
     private String delay;
     private String created;
     private int karma;
@@ -19,6 +20,14 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getDelay() {
@@ -60,7 +69,6 @@ public class User {
     public void setSubmitted(JSONArray submitted) {
         this.submitted = submitted;
     }
-
 
 
 }

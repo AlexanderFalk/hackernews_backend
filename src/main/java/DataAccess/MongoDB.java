@@ -158,6 +158,7 @@ public class MongoDB {
                         .append("created", user.getCreated())
                         .append("karma", user.getKarma())
                         .append("about", user.getAbout())
+                        .append("password", user.getPassword())
                         .append("submitted", user.getSubmitted())));
     }
 
@@ -173,6 +174,7 @@ public class MongoDB {
                         .append("created", userDocument.get("created"))
                         .append("karma", userDocument.get("karma"))
                         .append("about", userDocument.get("about"))
+                        .append("password", userDocument.get("password"))
                         .append("submitted", userDocument.get("submitted"))));
     }
 
