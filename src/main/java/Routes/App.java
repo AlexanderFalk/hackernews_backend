@@ -67,6 +67,19 @@ public class App {
     }
 
     /**
+     * Returns the ID of latest item submitted to the system, as wanted by Helge.
+     * @return
+     */
+    @GET
+    @Path("/latest")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getLatestDigested(){
+        int latestDigested = MongoDB.findLatestItem()-1; //Decrements by 1, as used method increments by 1 at the end.
+        return Response.ok().entity(latestDigested).build();
+
+    }
+
+    /**
      * Checks the input password against the decrypted password in the DB.
      * @param userDoc User Document from database to check password on.
      * @param inputPassword plain text input password.
@@ -76,6 +89,8 @@ public class App {
         String hashedPw = userDoc.getString("password");
         return BCrypt.checkpw(inputPassword, hashedPw);
     }
+
+
 
 
 

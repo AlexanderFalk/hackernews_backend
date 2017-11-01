@@ -2,6 +2,7 @@ package settings;
 
 import Routes.App;
 import Routes.ItemRoute;
+import Routes.TestRoute;
 import Routes.UserRoute;
 import io.swagger.jaxrs.config.BeanConfig;
 import javax.ws.rs.ApplicationPath;
@@ -31,6 +32,7 @@ public class Application extends javax.ws.rs.core.Application {
         classes.add( ItemRoute.class );
         classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        classes.add(TestRoute.class );
         return classes;
     }
 
