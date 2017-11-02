@@ -11,8 +11,7 @@ import org.bson.Document;
 
 import java.util.*;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.in;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
 
 
@@ -90,6 +89,12 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
 
+    public static String getAllCategoryItems(Item.PostType postType){
+        StringBuilder items = new StringBuilder();
+        MongoCursor<Document> cursor = itemCollection.find(eq("type", postType.toString())).iterator();
+        return iterateCollection(items, cursor);
+    }
+
 
     /**
      * This method is used to retrieve all the items in the item collection
@@ -113,7 +118,6 @@ public class MongoDB {
 
         return iterateCollection(items, cursor);
     }
-<<<<<<< HEAD
     */
     /**
      * This method is used to insert item

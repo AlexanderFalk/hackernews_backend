@@ -1,6 +1,7 @@
 package Routes;
 
 import DataAccess.MongoDB;
+import Model.Item;
 import io.swagger.annotations.Api;
 import org.bson.Document;
 import org.json.JSONArray;
@@ -36,8 +37,34 @@ public class App {
     @Path("/news")
     @Produces(MediaType.APPLICATION_JSON)
     public Response index(InputStream json) {
-        return Response.ok().entity("Welcome!").status(200).build();
+        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Story)).status(200).build();
     }
+
+    /**
+     * @return All posts with the "Show" type.
+     */
+    @GET
+    @Path("/show")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getShowHn(){
+        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Show)).build();
+    }
+
+    /**
+     * @return All posts with the "Show" type.
+     */
+    @GET
+    @Path("/ask")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAskHn(){
+        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Ask)).build();
+    }
+
+
+
+
+
+
 
     /**
      * Gets the status of the server.
