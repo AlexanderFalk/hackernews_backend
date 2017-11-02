@@ -87,8 +87,40 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
 
+    public static String getAllCategoryItems(Item.PostType postType){
+        StringBuilder items = new StringBuilder();
+        MongoCursor<Document> cursor = itemCollection.find(eq("type", postType.toString())).iterator();
+        return iterateCollection(items, cursor);
+    }
+
 
     /**
+<<<<<<< HEAD
+=======
+     * This method is used to retrieve all the items in the item collection
+     * @return - A String which contains all the documents.
+     */
+    /*public static String getNewestItems() {
+
+        StringBuilder items = new StringBuilder();
+        Block<Document> printBlock = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                System.out.println(document.toJson());
+                items.append(cursor.next().toJson());
+                if (cursor.hasNext()) {
+                    items.append(",");
+                }
+            }
+        };
+        MongoCursor<Document> cursor = itemCollection.find()
+                                        .sort(new BasicDBObject("timestamp", -1)).forEach(printBlock);
+
+        return iterateCollection(items, cursor);
+    }
+    */
+    /**
+>>>>>>> get_all_show
      * This method is used to insert item
      *
      * @param document - This parameter is the document pushed from the POST request

@@ -10,6 +10,21 @@ import org.json.JSONArray;
  */
 public class Item {
 
+    public enum PostType{
+        Job,
+        Story,
+        Comment,
+        Ask,
+        Show,
+        Poll,
+        PollOpt;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
+    }
+
     private int id;
     private boolean deleted;
     private String type;
