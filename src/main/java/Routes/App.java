@@ -25,10 +25,12 @@ import java.io.InputStreamReader;
 @Api(value = "/", description = "This is the default window")
 public class App {
 
+    private static final Logger logger = LogManager.getLogger(App.class);
+
     /**
      * The three states the server can be in.
      */
-    enum Status{
+    enum Status {
         Alive,
         Update,
         Dead
@@ -50,7 +52,7 @@ public class App {
     @GET
     @Path("/show")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getShowHn(){
+    public Response getShowHn() {
         return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Show)).build();
     }
 
@@ -60,24 +62,20 @@ public class App {
     @GET
     @Path("/ask")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAskHn(){
+    public Response getAskHn() {
         return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Ask)).build();
     }
 
 
-
-
-
-
-
     /**
      * Gets the status of the server.
+     *
      * @return "Alive", if up-and-running. "Update" if down for maintenance. "Down" for the system being down.
      */
     @GET
     @Path("/status")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getStatus(){
+    public Response getStatus() {
         return Response.ok().entity(Status.Alive.toString()).build(); //If this statement can be executed - the server is up and running.
     }
 
@@ -109,40 +107,39 @@ public class App {
         }
 
         Document userDoc = MongoDB.getUserDocument(id);
-        if(passwordMatches(userDoc, password)) {
+        if (passwordMatches(userDoc, password)) {
             String userJson = MongoDB.getUser(id);
             return Response.status(200).entity(userJson).build();
-        }
-        else return Response.status(401).entity("Wrong username/password combination").build();
+        } else return Response.status(401).entity("Wrong username/password combination").build();
 
     }
 
     /**
      * Returns the ID of latest item submitted to the system, as wanted by Helge.
+     *
      * @return the ID of the latest item as a plain text integer.
      */
     @GET
     @Path("/latest")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getLatestDigested(){
-        int latestDigested = MongoDB.findLatestItem()-1; //Decrements by 1, as findLatestItem() method increments by 1 at the end.
-        return Response.ok().entity(latestDigested).build();
+    public Response getLatestDigested() {
+        int latestDigested = MongoDB.findLatestItem() - 1; //Decrements by 1, as findLatestItem() method increments by 1 at the end.
+        logger.info("Returned latest: " + latestDigested);
+        return Response.ok().entity(String.valueOf(latestDigested)).build();
 
     }
 
     /**
      * Checks the input password against the decrypted password in the DB.
-     * @param userDoc User Document from database to check password on.
+     *
+     * @param userDoc       User Document from database to check password on.
      * @param inputPassword plain text input password.
      * @return true, if passwords match. False, if they don't.
      */
-    private Boolean passwordMatches(Document userDoc, String inputPassword){
+    private Boolean passwordMatches(Document userDoc, String inputPassword) {
         String hashedPw = userDoc.getString("password");
         return BCrypt.checkpw(inputPassword, hashedPw);
     }
-
-
-
 
 
 }
