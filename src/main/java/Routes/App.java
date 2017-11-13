@@ -3,11 +3,15 @@ package Routes;
 import DataAccess.MongoDB;
 import Model.Item;
 import io.swagger.annotations.Api;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.event.Level;
+
+import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
