@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 @Api(value = "/", description = "This is the default window")
 public class App {
 
-    private static final Logger logger = LogManager.getLogger(App.class);
+    private static final Logger logger = LogManager.getLogger();
 
     /**
      * The three states the server can be in.
@@ -109,8 +109,12 @@ public class App {
         Document userDoc = MongoDB.getUserDocument(id);
         if (passwordMatches(userDoc, password)) {
             String userJson = MongoDB.getUser(id);
+            logger.info("Username: '" + id + "' logged in successfully.");
             return Response.status(200).entity(userJson).build();
-        } else return Response.status(401).entity("Wrong username/password combination").build();
+        } else{
+            logger.info("Username: '" + id + "' - wrong password.");
+            return Response.status(401).entity("Wrong username/password combination").build();
+        }
 
     }
 

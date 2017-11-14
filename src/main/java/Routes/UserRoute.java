@@ -5,6 +5,8 @@ import Model.User;
 import com.sun.org.apache.bcel.internal.util.BCELifier;
 import io.swagger.annotations.Api;
 import io.swagger.models.auth.In;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +32,8 @@ import java.util.List;
 @Path("/user")
 @Api(value = "/user", description = "")
 public class UserRoute {
+
+    private static Logger logger = LogManager.getLogger(UserRoute.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -6,6 +6,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONObject;
 
@@ -23,6 +25,8 @@ import java.util.ArrayList;
     consumes = "application/json", produces = "application/json")
 public class ItemRoute {
 
+    private static Logger logger = LogManager.getLogger(ItemRoute.class);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -38,6 +42,7 @@ public class ItemRoute {
             })
     public Response item() {
         if(MongoDB.getAllItems().isEmpty()) {
+            logger.error("Returned code 204 - no items were retrieved.");
             return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
         }
         return Response.status(200).entity(MongoDB.getAllItems()).build();
@@ -131,8 +136,11 @@ public class ItemRoute {
                 .append("descendants", item.getDescendants());
 
         //Returns status code 409 conflict if item id already exists in the database.
-        if (MongoDB.itemExists(item.getId()))
+        if (MongoDB.itemExists(item.getId())){
+            logger.info("An item with an already existing ID was posted. Returned code 409.");
             return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        }
 
         //Updates the Users submitted items in the database
         Document userDoc = MongoDB.getUserDocument(item.getBy());
@@ -198,6 +206,7 @@ public class ItemRoute {
 
         MongoDB.updateItem(itemDocument);
 
+        logger.info("Item with id: " + item.getId() + " was updated/put.");
         return Response.ok().entity("{ Update : ok }").build();
     }
 
@@ -272,8 +281,11 @@ public class ItemRoute {
                 .append("descendants", item.getDescendants());
 
         //Returns status code 409 conflict if item id already exists in the database.
-        if (MongoDB.itemExists(item.getId()))
+        if (MongoDB.itemExists(item.getId())){
+            logger.info("Comment (item) with id: " + item.getId() + " with an already existing ID was posted. Returned 409");
             return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        }
 
         MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
         // Inserts the item into the database
