@@ -42,7 +42,7 @@ public class App {
     @GET
     @Path("/news")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response index(InputStream json) {
+    public Response index() {
         return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Story)).status(200).build();
     }
 
