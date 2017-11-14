@@ -27,7 +27,7 @@ import java.util.ArrayList;
 public class ItemRoute {
 
     private static final Counter requests = Counter.build()
-            .name("requests_total").help("Total Requests for items").register();
+            .name("item_requests_total").help("Total Requests for item related paths").register();
 
     private final Logger logger = LogManager.getLogger(ItemRoute.class.getName());
 
@@ -98,7 +98,7 @@ public class ItemRoute {
                             "Possible an item with same ID")
             })
     public Response postItem(InputStream json) throws IOException {
-
+        requests.inc();
         try {
             requests.inc();
             BufferedReader reader = new BufferedReader(new InputStreamReader(json));

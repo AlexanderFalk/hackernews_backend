@@ -3,6 +3,7 @@ package Routes;
 import DataAccess.MongoDB;
 import Model.Item;
 import Model.User;
+import io.prometheus.client.Counter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,6 +28,9 @@ import java.io.InputStreamReader;
 public class App {
 
     private final Logger logger = LogManager.getLogger(App.class.getName());
+
+    private static final Counter requests = Counter.build()
+            .name("default_requests_total").help("Total Requests for default paths").register();
 
     /**
      * The three states the server can be in.
@@ -55,7 +59,7 @@ public class App {
                     @ApiResponse(code = 200, message = "Successfully retrieved all newest items.")
             })
     public Response index() {
-
+        requests.inc();
         try {
             logger.info("Successfully retrieved all newest items");
             return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Story)).status(200).build();
@@ -83,6 +87,7 @@ public class App {
                     @ApiResponse(code = 200, message = "Successfully retrieved all items with SHOW as type.")
             })
     public Response getShowHn() {
+        requests.inc();
         try {
             logger.info("Successfully retrieved all items with SHOW as type");
             return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Show)).build();
@@ -110,6 +115,7 @@ public class App {
                     @ApiResponse(code = 200, message = "Successfully retrieved all items with ASK as type.")
             })
     public Response getAskHn() {
+        requests.inc();
         try {
             logger.info("Successfully retrieved all items with ASK as type");
             return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Ask)).build();
@@ -141,6 +147,7 @@ public class App {
 
             })
     public Response getStatus() {
+        requests.inc();
         logger.info("Application is up and running. Woop!");
         return Response.ok().entity(Status.Alive.toString()).build(); //If this statement can be executed - the server is up and running.
     }
@@ -162,6 +169,7 @@ public class App {
                     @ApiResponse(code = 401, message = "Wrong username/password. Try again.")
             })
     public Response login(InputStream json) throws IOException {
+        requests.inc();
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
         String line;
@@ -217,6 +225,7 @@ public class App {
                     @ApiResponse(code = 200, message = "Latest item has been returned")
             })
     public Response getLatestDigested() {
+        requests.inc();
         int latestDigested = MongoDB.findLatestItem() - 1; //Decrements by 1, as findLatestItem() method increments by 1 at the end.
         try {
             logger.info("Returned latest: " + latestDigested);

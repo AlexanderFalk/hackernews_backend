@@ -2,6 +2,7 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.User;
+import io.prometheus.client.Counter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,6 +34,9 @@ public class UserRoute {
 
     private final Logger logger = LogManager.getLogger(UserRoute.class.getName());
 
+    private static final Counter requests = Counter.build()
+            .name("user_requests_total").help("Total Requests for user related paths").register();
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -47,6 +51,7 @@ public class UserRoute {
                     @ApiResponse(code = 200, message = "All users has been retrieved")
             })
     public Response getUsers(){
+        requests.inc();
         try {
             logger.info("All users has been requested and send back in a response");
             return Response.ok().entity(MongoDB.getUsers()).build();
@@ -72,6 +77,7 @@ public class UserRoute {
                     @ApiResponse(code = 200, message = "The user has been retrieved successfully")
             })
     public Response getUser(@PathParam("id") String id) {
+        requests.inc();
         try {
             logger.info("Found user with ID: " + id);
             return Response.ok().entity(MongoDB.getUser(id)).build();
@@ -97,6 +103,7 @@ public class UserRoute {
                     @ApiResponse(code = 200, message = "User has been created successfully")
             })
     public Response postUser(InputStream json) throws IOException, JSONException {
+        requests.inc();
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
         String line;
@@ -193,6 +200,7 @@ public class UserRoute {
                     @ApiResponse(code = 200, message = "User has been updated successfully")
             })
     public Response updateUser(@PathParam("id") String id, InputStream json) throws IOException {
+        requests.inc();
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
         String line;
