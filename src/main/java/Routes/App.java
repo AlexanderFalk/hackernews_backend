@@ -103,6 +103,7 @@ public class App {
             password = jsonObject.getString("password");
         } catch (JSONException ex) {
             ex.printStackTrace();
+            logger.error(ex.getMessage());
             return Response.status(400).entity(ex.getMessage()).build();
         }
 
