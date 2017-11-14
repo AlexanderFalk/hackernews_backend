@@ -173,7 +173,6 @@ public class ItemRoute {
     }
 
     @PUT
-    @Path("{itemId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -190,7 +189,7 @@ public class ItemRoute {
                     @ApiResponse(code = 409, message = "Indicating that the request could not be proceeded. " +
                             "Maybe a bad request body was received.")
             })
-    public Response updateItem(InputStream stream, @PathParam("itemId") int itemId) throws IOException {
+    public Response updateItem(InputStream stream) throws IOException {
 
         Item item = null;
         try {
@@ -205,7 +204,7 @@ public class ItemRoute {
 
             JSONObject object = new JSONObject(out.toString());
             item = new Item(
-                    itemId,
+                    object.getInt("id"),
                     object.getBoolean("deleted"),
                     object.getString("type"),
                     object.getString("by"),
