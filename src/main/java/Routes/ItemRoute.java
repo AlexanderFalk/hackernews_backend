@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONObject;
 
-import javax.persistence.EntityExistsException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,7 +29,7 @@ public class ItemRoute {
     private static final Counter requests = Counter.build()
             .name("requests_total").help("Total Requests for items").register();
 
-    private final Logger logger = LogManager.getLogger(ItemRoute.class);
+    private final Logger logger = LogManager.getLogger(ItemRoute.class.getName());
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -51,6 +50,8 @@ public class ItemRoute {
             logger.error("Returned code 204 - no items were retrieved.");
             return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
         }
+        logger.info("All items were retrieved from host");
+
         return Response.status(200).entity(MongoDB.getAllItems()).build();
     }
 
@@ -71,8 +72,11 @@ public class ItemRoute {
     public Response item(@PathParam("id") int id) {
         requests.inc();
         if(MongoDB.getItem(id) == null) {
+            logger.error("Returned code 204 - no item with id " + id + " found.",
+                    new NullPointerException("No Item ID found"));
             return Response.status(204).entity("Item not found").build();
         }
+        logger.info("Item ID: " + id + " retrieved!");
         return Response.status(200).entity(MongoDB.getItem(id)).build();
     }
 
@@ -160,7 +164,7 @@ public class ItemRoute {
             MongoDB.updateUser(userDoc);
 
             MongoDB.insertItem(itemDocument);
-
+            logger.info("Inserted item with ID: " + item.getId() + " !");
             return Response.status(200).entity(itemDocument.toJson()).build();
         } catch (ServerErrorException see) {
             logger.error("Server error occured for postITEM. See trace", see);
@@ -169,59 +173,80 @@ public class ItemRoute {
     }
 
     @PUT
+    @Path("{itemId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateItem(InputStream stream) throws IOException {
+    @ApiOperation(
+            httpMethod = "PUT",
+            value = "Update an item",
+            notes = "You can update an item by sending a PUT request with a item body included. PUT it at " +
+                    "/hackernews/item/<itemID>",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200, message = "A new comment has been added to its parent"),
+                    @ApiResponse(code = 400, message = "Bad request. Check your payload"),
+                    @ApiResponse(code = 409, message = "Indicating that the request could not be proceeded. " +
+                            "Maybe a bad request body was received.")
+            })
+    public Response updateItem(InputStream stream, @PathParam("itemId") int itemId) throws IOException {
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        StringBuilder out = new StringBuilder();
-        String line;
+        Item item = null;
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder out = new StringBuilder();
+            String line;
 
-        while ((line = reader.readLine()) != null) {
-            out.append(line);
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+            }
+            reader.close();
+
+            JSONObject object = new JSONObject(out.toString());
+            item = new Item(
+                    itemId,
+                    object.getBoolean("deleted"),
+                    object.getString("type"),
+                    object.getString("by"),
+                    object.getString("timestamp"),
+                    object.getString("text"),
+                    object.getBoolean("dead"),
+                    object.getInt("parent"),
+                    object.getJSONArray("poll"),
+                    object.getJSONArray("kids"),
+                    object.getString("url"),
+                    object.getInt("score"),
+                    object.getString("title"),
+                    object.getJSONArray("parts"),
+                    object.getInt("descendants")
+            );
+
+            Document itemDocument = new Document("id", item.getId())
+                    .append("deleted", item.isDeleted())
+                    .append("type", item.getType())
+                    .append("by", item.getBy())
+                    .append("timestamp", item.getTimestamp())
+                    .append("text", item.getText())
+                    .append("dead", item.isDead())
+                    .append("parent", item.getParent())
+                    .append("poll", item.getPoll())
+                    .append("kids", item.getKids())
+                    .append("url", item.getUrl())
+                    .append("score", item.getScore())
+                    .append("title", item.getTitle())
+                    .append("parts", item.getParts())
+                    .append("descendants", item.getDescendants());
+
+
+            MongoDB.updateItem(itemDocument);
+
+            logger.info("Item with id: " + item.getId() + " was updated/put.");
+            return Response.ok().entity("{ Update : ok }").build();
+        }catch (NullPointerException error) {
+            logger.error("Unable to update item with ID: " + item.getId());
+            return Response.status(400).entity("{Update : failed}").build();
         }
-        reader.close();
-
-        JSONObject object = new JSONObject(out.toString());
-        Item item = new Item(
-                object.getInt("id"),
-                object.getBoolean("deleted"),
-                object.getString("type"),
-                object.getString("by"),
-                object.getString("timestamp"),
-                object.getString("text"),
-                object.getBoolean("dead"),
-                object.getInt("parent"),
-                object.getJSONArray("poll"),
-                object.getJSONArray("kids"),
-                object.getString("url"),
-                object.getInt("score"),
-                object.getString("title"),
-                object.getJSONArray("parts"),
-                object.getInt("descendants")
-        );
-
-        Document itemDocument = new Document("id", item.getId())
-                .append("deleted", item.isDeleted())
-                .append("type", item.getType())
-                .append("by", item.getBy())
-                .append("timestamp", item.getTimestamp())
-                .append("text", item.getText())
-                .append("dead", item.isDead())
-                .append("parent", item.getParent())
-                .append("poll", item.getPoll())
-                .append("kids", item.getKids())
-                .append("url", item.getUrl())
-                .append("score", item.getScore())
-                .append("title", item.getTitle())
-                .append("parts", item.getParts())
-                .append("descendants", item.getDescendants());
-
-
-        MongoDB.updateItem(itemDocument);
-
-        logger.info("Item with id: " + item.getId() + " was updated/put.");
-        return Response.ok().entity("{ Update : ok }").build();
     }
 
 
@@ -242,6 +267,7 @@ public class ItemRoute {
                             "Possible an item with same ID")
             })
     public Response comment(InputStream json, @PathParam("itemId") int parentID) throws IOException {
+        requests.inc();
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
         String line;

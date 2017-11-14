@@ -2,16 +2,17 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.Item;
+import Model.User;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
-import org.slf4j.event.Level;
-
-import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -25,7 +26,7 @@ import java.io.InputStreamReader;
 @Api(value = "/", description = "This is the default window")
 public class App {
 
-    private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger(App.class.getName());
 
     /**
      * The three states the server can be in.
@@ -42,8 +43,26 @@ public class App {
     @GET
     @Path("/news")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "News",
+            notes = "Get all newest items",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 500, message = "Could not return all newest items. Might be server error"),
+                    @ApiResponse(code = 200, message = "Successfully retrieved all newest items.")
+            })
     public Response index() {
-        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Story)).status(200).build();
+
+        try {
+            logger.info("Successfully retrieved all newest items");
+            return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Story)).status(200).build();
+        } catch (NullPointerException error) {
+            logger.error("There were an issue retrieving all newest items. See trace: ", error);
+            return Response.status(500).build();
+        }
     }
 
     /**
@@ -52,8 +71,25 @@ public class App {
     @GET
     @Path("/show")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Show",
+            notes = "Get all items that has type \"SHOW\"",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 500, message = "Could not return all items with SHOW as type. Might be server error"),
+                    @ApiResponse(code = 200, message = "Successfully retrieved all items with SHOW as type.")
+            })
     public Response getShowHn() {
-        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Show)).build();
+        try {
+            logger.info("Successfully retrieved all items with SHOW as type");
+            return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Show)).build();
+        } catch (NullPointerException error) {
+            logger.error("There were an issue retrieving all items with SHOW as type. See trace: ", error);
+            return Response.status(500).build();
+        }
     }
 
     /**
@@ -62,8 +98,26 @@ public class App {
     @GET
     @Path("/ask")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Ask",
+            notes = "Get all items that has type \"ASK\"",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 500, message = "Could not return all items with ASK as type. Might be server error"),
+                    @ApiResponse(code = 200, message = "Successfully retrieved all items with ASK as type.")
+            })
     public Response getAskHn() {
-        return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Ask)).build();
+        try {
+            logger.info("Successfully retrieved all items with ASK as type");
+            return Response.ok().entity(MongoDB.getAllCategoryItems(Item.PostType.Ask)).build();
+        } catch (NullPointerException error) {
+            logger.error("There were an issue retrieving all items with ASK as type. See trace: ", error);
+            return Response.status(500).build();
+        }
+
     }
 
 
@@ -75,7 +129,19 @@ public class App {
     @GET
     @Path("/status")
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Status",
+            notes = "Server is up and running if a response is returned.",
+            response = App.class,
+            responseContainer = "String")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200, message = "Server is up and running"),
+
+            })
     public Response getStatus() {
+        logger.info("Application is up and running. Woop!");
         return Response.ok().entity(Status.Alive.toString()).build(); //If this statement can be executed - the server is up and running.
     }
 
@@ -83,6 +149,18 @@ public class App {
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "POST",
+            value = "Login",
+            notes = "Send a POST request with ID and Password as HTTP Body to login",
+            response = User.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 400, message = "Not able to parse the HTTP body. Check format"),
+                    @ApiResponse(code = 200, message = "Successfully logged in."),
+                    @ApiResponse(code = 401, message = "Wrong username/password. Try again.")
+            })
     public Response login(InputStream json) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
@@ -93,9 +171,9 @@ public class App {
         }
         reader.close();
 
-        JSONObject jsonObject = null;
-        String id = null;
-        String password = null;
+        JSONObject jsonObject;
+        String id;
+        String password;
 
         try {
             jsonObject = new JSONObject(out.toString());
@@ -127,10 +205,27 @@ public class App {
     @GET
     @Path("/latest")
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Finds the latest item",
+            notes = "Send a request to /hackernews/latest and you will retrieve the latest number",
+            response = Item.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 500, message = "Latest item could not be returned. Could be server error"),
+                    @ApiResponse(code = 200, message = "Latest item has been returned")
+            })
     public Response getLatestDigested() {
         int latestDigested = MongoDB.findLatestItem() - 1; //Decrements by 1, as findLatestItem() method increments by 1 at the end.
-        logger.info("Returned latest: " + latestDigested);
-        return Response.ok().entity(String.valueOf(latestDigested)).build();
+        try {
+            logger.info("Returned latest: " + latestDigested);
+            return Response.ok().entity(String.valueOf(latestDigested)).build();
+        } catch (ServerErrorException error) {
+            logger.error("Could not return the latest item. See trace: " , error);
+            return Response.status(500).build();
+        }
+
 
     }
 

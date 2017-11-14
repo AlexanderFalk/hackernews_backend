@@ -1,7 +1,6 @@
 package Metrics;
 
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
 
 import javax.ws.rs.GET;

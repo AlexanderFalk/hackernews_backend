@@ -2,9 +2,10 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.User;
-import com.sun.org.apache.bcel.internal.util.BCELifier;
 import io.swagger.annotations.Api;
-import io.swagger.models.auth.In;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -12,45 +13,89 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
-import settings.Application;
 
-import javax.json.*;
-import javax.print.attribute.standard.Media;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 @Path("/user")
-@Api(value = "/user", description = "")
+@Api(value = "/user", description = "Here you will find operations about users",
+        consumes = "application/json", produces = "application/json")
 public class UserRoute {
 
-    private final Logger logger = LogManager.getLogger(UserRoute.class);
+    private final Logger logger = LogManager.getLogger(UserRoute.class.getName());
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Finds all users",
+            notes = "Can be produced by making a GET request to /hackernews/user",
+            response = User.class,
+            responseContainer = "String")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 204, message = "No content/users found"),
+                    @ApiResponse(code = 200, message = "All users has been retrieved")
+            })
     public Response getUsers(){
-        return Response.ok().entity(MongoDB.getUsers()).build();
+        try {
+            logger.info("All users has been requested and send back in a response");
+            return Response.ok().entity(MongoDB.getUsers()).build();
+        }catch (ServerErrorException error) {
+            logger.error("Could not reply with a response of all users. See trace: ", error);
+            return Response.status(204).entity("{Info : No users found}").build();
+        }
+
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "GET",
+            value = "Finds a specific user",
+            notes = "Can be produced by making a GET request to /hackernews/user/<ID>",
+            response = User.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 204, message = "Specific user not found"),
+                    @ApiResponse(code = 200, message = "The user has been retrieved successfully")
+            })
     public Response getUser(@PathParam("id") String id) {
-        return Response.ok().entity(MongoDB.getUser(id)).build();
+        try {
+            logger.info("Found user with ID: " + id);
+            return Response.ok().entity(MongoDB.getUser(id)).build();
+        }catch (ServerErrorException error) {
+            logger.warn("User with ID: " + id + " not found", error);
+            return Response.status(204).entity("{Info: User not found}").build();
+        }
+
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "POST",
+            value = "Creates a new user",
+            notes = "Send a POST request to the following url : /hackernews/user/<ID> to create a new user",
+            response = User.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 400, message = "There were an issue translating the HTTP body. Check for errors"),
+                    @ApiResponse(code = 200, message = "User has been created successfully")
+            })
     public Response postUser(InputStream json) throws IOException, JSONException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
@@ -61,14 +106,14 @@ public class UserRoute {
         }
         reader.close();
 
-        JSONObject jsonObject = null;
-        String password = null;
-        String about = null;
-        String created = null;
-        String delay = null;
-        String id = null;
-        int karma = 0;
-        JSONArray submitted = null;
+        JSONObject jsonObject;
+        String password;
+        String about;
+        String created;
+        String delay;
+        String id;
+        int karma;
+        JSONArray submitted;
 
         try {
             jsonObject = new JSONObject(out.toString());
@@ -122,8 +167,6 @@ public class UserRoute {
         }
 
         MongoDB.insertUser(document);
-        System.out.println("Inserting user...");
-
         return Response.ok().entity(values.toString()).build();
 
     }
@@ -138,6 +181,17 @@ public class UserRoute {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            httpMethod = "PUT",
+            value = "Updates a specific user",
+            notes = "Can update a user by sending a PUT request to /hackernews/user/<ID> with the respectable HTTP body",
+            response = User.class,
+            responseContainer = "JSON")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 400, message = "Issue with translating the HTTP body"),
+                    @ApiResponse(code = 200, message = "User has been updated successfully")
+            })
     public Response updateUser(@PathParam("id") String id, InputStream json) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(json));
         StringBuilder out = new StringBuilder();
@@ -148,13 +202,13 @@ public class UserRoute {
         }
         reader.close();
 
-        JSONObject jsonObject = null;
-        String about = null;
-        String password = null;
-        String created = null;
-        String delay = null;
-        int karma = 0;
-        JSONArray submitted = null;
+        JSONObject jsonObject;
+        String about;
+        String password;
+        String created;
+        String delay;
+        int karma;
+        JSONArray submitted;
 
         try {
             jsonObject = new JSONObject(out.toString());
@@ -166,7 +220,7 @@ public class UserRoute {
             submitted = jsonObject.getJSONArray("submitted");
         } catch (JSONException ex) {
             ex.printStackTrace();
-            logger.error(ex.getMessage());
+            logger.error("There were an issue formatting to JSON", ex.getMessage());
             return Response.status(400).entity(ex.getMessage()).build();
         }
 
