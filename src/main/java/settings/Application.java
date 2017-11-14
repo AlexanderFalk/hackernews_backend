@@ -5,12 +5,13 @@ import Routes.ItemRoute;
 import Routes.TestRoute;
 import Routes.UserRoute;
 import io.swagger.jaxrs.config.BeanConfig;
+
 import javax.ws.rs.ApplicationPath;
 import java.util.HashSet;
 import java.util.Set;
 
 //Defines the base URI for all resource URIs.
-@ApplicationPath("/")
+@ApplicationPath( "/" )
 //The java class declares root resource and provider classes
 public class Application extends javax.ws.rs.core.Application {
 
@@ -20,7 +21,9 @@ public class Application extends javax.ws.rs.core.Application {
         beanConfig.setContact("Alexander Falk - alexfalk7@gmail.com");
         beanConfig.setTitle("Hackernews API");
         beanConfig.setResourcePackage("Routes");
+        beanConfig.setHost("localhost:8080");
         beanConfig.setBasePath("/api");
+        beanConfig.setResourcePackage("io.swagger.resources");
     }
 
     //The method returns a non-empty collection with classes, that must be included in the published JAX-RS application
@@ -30,6 +33,7 @@ public class Application extends javax.ws.rs.core.Application {
         classes.add( App.class );
         classes.add( UserRoute.class );
         classes.add( ItemRoute.class );
+        classes.add( Metrics.Metrics.class );
         classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         classes.add(TestRoute.class );

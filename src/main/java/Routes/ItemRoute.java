@@ -2,13 +2,17 @@ package Routes;
 
 import DataAccess.MongoDB;
 import Model.Item;
+import io.prometheus.client.Counter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONObject;
 
+import javax.persistence.EntityExistsException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,6 +26,10 @@ import java.util.ArrayList;
 @Api(value = "/item", description = "Here you will find operations about items",
     consumes = "application/json", produces = "application/json")
 public class ItemRoute {
+
+
+    private static final Counter requests = Counter.build()
+            .name("requests_total").help("Total Requests for items").register();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -37,6 +45,7 @@ public class ItemRoute {
                     @ApiResponse(code = 200, message = "All items has been retrieved")
             })
     public Response item() {
+        requests.inc();
         if(MongoDB.getAllItems().isEmpty()) {
             return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
         }
@@ -58,7 +67,7 @@ public class ItemRoute {
                     @ApiResponse(code = 200, message = "Item ID found successfully")
     })
     public Response item(@PathParam("id") int id) {
-
+        requests.inc();
         if(MongoDB.getItem(id) == null) {
             return Response.status(204).entity("Item not found").build();
         }
@@ -83,67 +92,73 @@ public class ItemRoute {
                             "Possible an item with same ID")
             })
     public Response postItem(InputStream json) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(json));
-        StringBuilder out = new StringBuilder();
-        String line;
+
+        try {
+            requests.inc();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(json));
+            StringBuilder out = new StringBuilder();
+            String line;
 
 
-        while ((line = reader.readLine()) != null) {
-            out.append(line);
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+            }
+            reader.close();
+
+            // Generating timestamp
+            String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
+
+            // Get latest ItemID and increment with one
+            int id = MongoDB.findLatestItem();
+            JSONObject object = new JSONObject(out.toString());
+            Item item = new Item(
+                    id,
+                    object.getBoolean("deleted"),
+                    object.getString("type"),
+                    object.getString("by"),
+                    timestamp,
+                    object.getString("text"),
+                    object.getBoolean("dead"),
+                    object.getInt("parent"),
+                    object.getString("url"),
+                    object.getInt("score"),
+                    object.getString("title")
+            );
+
+            Document itemDocument = new Document("id", item.getId())
+                    .append("deleted", item.isDeleted())
+                    .append("type", item.getType())
+                    .append("by", item.getBy())
+                    .append("timestamp", item.getTimestamp())
+                    .append("text", item.getText())
+                    .append("dead", item.isDead())
+                    .append("parent", item.getParent())
+                    .append("poll", item.getPoll())
+                    .append("kids", item.getKids())
+                    .append("url", item.getUrl())
+                    .append("score", item.getScore())
+                    .append("title", item.getTitle())
+                    .append("parts", item.getParts())
+                    .append("descendants", item.getDescendants());
+
+            //Returns status code 409 conflict if item id already exists in the database.
+            if (MongoDB.itemExists(item.getId())) {
+                return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+            }
+            //Updates the Users submitted items in the database
+            Document userDoc = MongoDB.getUserDocument(item.getBy());
+            ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
+            submitted.add(item.getId());
+            userDoc.put("submitted", submitted);
+            MongoDB.updateUser(userDoc);
+
+
+            MongoDB.insertItem(itemDocument);
+            return Response.status(200).entity(itemDocument.toJson()).build();
         }
-        reader.close();
-
-        // Generating timestamp
-        String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
-
-        // Get latest ItemID and increment with one
-        int id = MongoDB.findLatestItem();
-
-        JSONObject object = new JSONObject(out.toString());
-        Item item = new Item(
-                id,
-                object.getBoolean("deleted"),
-                object.getString("type"),
-                object.getString("by"),
-                timestamp,
-                object.getString("text"),
-                object.getBoolean("dead"),
-                object.getInt("parent"),
-                object.getString("url"),
-                object.getInt("score"),
-                object.getString("title")
-        );
-
-        Document itemDocument = new Document("id", item.getId())
-                .append("deleted", item.isDeleted())
-                .append("type", item.getType())
-                .append("by", item.getBy())
-                .append("timestamp", item.getTimestamp())
-                .append("text", item.getText())
-                .append("dead", item.isDead())
-                .append("parent", item.getParent())
-                .append("poll", item.getPoll())
-                .append("kids", item.getKids())
-                .append("url", item.getUrl())
-                .append("score", item.getScore())
-                .append("title", item.getTitle())
-                .append("parts", item.getParts())
-                .append("descendants", item.getDescendants());
-
-        //Returns status code 409 conflict if item id already exists in the database.
-        if (MongoDB.itemExists(item.getId()))
-            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
-
-        //Updates the Users submitted items in the database
-        Document userDoc = MongoDB.getUserDocument(item.getBy());
-        ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
-        submitted.add(item.getId());
-        userDoc.put("submitted", submitted);
-        MongoDB.updateUser(userDoc);
-
-        MongoDB.insertItem(itemDocument);
-
-        return Response.status(200).entity(itemDocument.toJson()).build();
+        catch (EntityExistsException e) {
+            return Response.status(500).entity("Server error. Please contact a system administrator!").build();
+        }
     }
 
     @PUT
