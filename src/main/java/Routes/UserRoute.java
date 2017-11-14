@@ -33,7 +33,7 @@ import java.util.List;
 @Api(value = "/user", description = "")
 public class UserRoute {
 
-    private static Logger logger = LogManager.getLogger(UserRoute.class);
+    private final Logger logger = LogManager.getLogger(UserRoute.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

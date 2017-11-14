@@ -1,6 +1,8 @@
 package Routes;
 
 import DataAccess.MongoDB;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +30,8 @@ import java.util.Date;
 @Path("/post")
 public class TestRoute {
 
+    private final Logger logger = LogManager.getLogger(TestRoute.class);
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -43,6 +47,7 @@ public class TestRoute {
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
+            logger.error(e.getMessage());
             return Response.status(400).entity("Syntax error! Could not read supplied JSON text.").build();
         }
 
@@ -68,6 +73,7 @@ public class TestRoute {
             postUrl = jsonObject.getString("post_url");
         } catch (JSONException ex) {
             ex.printStackTrace();
+            logger.error(ex.getMessage());
             return Response.status(500).entity(ex.getMessage()).build();
         }
 
@@ -112,8 +118,11 @@ public class TestRoute {
                 .append("submitted", new JSONArray().put(hanesstId)); //Updates the Users submitted items here if he doesn't exist.
 
         //Returns status code 409 CONFLICT if item id already exists in the database.
-        if (MongoDB.itemExists(hanesstId))
+        if (MongoDB.itemExists(hanesstId)){
+            logger.info("Item with already existing hanesst_id was posted. Returned 409.");
             return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        }
 
         MongoDB.insertItem(itemDoc);
         System.out.println("Inserting item...");

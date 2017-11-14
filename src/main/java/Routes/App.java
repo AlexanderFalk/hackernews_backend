@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 @Api(value = "/", description = "This is the default window")
 public class App {
 
-    private static final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     /**
      * The three states the server can be in.

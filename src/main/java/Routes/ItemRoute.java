@@ -25,7 +25,7 @@ import java.util.ArrayList;
     consumes = "application/json", produces = "application/json")
 public class ItemRoute {
 
-    private static Logger logger = LogManager.getLogger(ItemRoute.class);
+    private final Logger logger = LogManager.getLogger(ItemRoute.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
