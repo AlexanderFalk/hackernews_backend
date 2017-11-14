@@ -27,9 +27,10 @@ import java.util.ArrayList;
     consumes = "application/json", produces = "application/json")
 public class ItemRoute {
 
-
     private static final Counter requests = Counter.build()
             .name("requests_total").help("Total Requests for items").register();
+
+    private final Logger logger = LogManager.getLogger(ItemRoute.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -47,6 +48,7 @@ public class ItemRoute {
     public Response item() {
         requests.inc();
         if(MongoDB.getAllItems().isEmpty()) {
+            logger.error("Returned code 204 - no items were retrieved.");
             return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
         }
         return Response.status(200).entity(MongoDB.getAllItems()).build();
@@ -105,11 +107,13 @@ public class ItemRoute {
             }
             reader.close();
 
+
             // Generating timestamp
-            String timestamp =  String.valueOf(System.currentTimeMillis() / 1000);
+            String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
 
             // Get latest ItemID and increment with one
             int id = MongoDB.findLatestItem();
+
             JSONObject object = new JSONObject(out.toString());
             Item item = new Item(
                     id,
@@ -143,8 +147,11 @@ public class ItemRoute {
 
             //Returns status code 409 conflict if item id already exists in the database.
             if (MongoDB.itemExists(item.getId())) {
+                logger.info("An item with an already existing ID was posted. Returned code 409.");
                 return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
             }
+
             //Updates the Users submitted items in the database
             Document userDoc = MongoDB.getUserDocument(item.getBy());
             ArrayList<Integer> submitted = (ArrayList<Integer>) userDoc.get("submitted");
@@ -152,12 +159,12 @@ public class ItemRoute {
             userDoc.put("submitted", submitted);
             MongoDB.updateUser(userDoc);
 
-
             MongoDB.insertItem(itemDocument);
+
             return Response.status(200).entity(itemDocument.toJson()).build();
-        }
-        catch (EntityExistsException e) {
-            return Response.status(500).entity("Server error. Please contact a system administrator!").build();
+        } catch (ServerErrorException see) {
+            logger.error("Server error occured for postITEM. See trace", see);
+            return Response.status(500).build();
         }
     }
 
@@ -213,6 +220,7 @@ public class ItemRoute {
 
         MongoDB.updateItem(itemDocument);
 
+        logger.info("Item with id: " + item.getId() + " was updated/put.");
         return Response.ok().entity("{ Update : ok }").build();
     }
 
@@ -287,8 +295,11 @@ public class ItemRoute {
                 .append("descendants", item.getDescendants());
 
         //Returns status code 409 conflict if item id already exists in the database.
-        if (MongoDB.itemExists(item.getId()))
+        if (MongoDB.itemExists(item.getId())){
+            logger.info("Comment (item) with id: " + item.getId() + " with an already existing ID was posted. Returned 409");
             return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+
+        }
 
         MongoDB.updateUser(userDoc); //(2 of 2) Updates the Users submitted items in the database
         // Inserts the item into the database

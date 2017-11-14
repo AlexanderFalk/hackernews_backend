@@ -5,6 +5,8 @@ import Model.User;
 import com.sun.org.apache.bcel.internal.util.BCELifier;
 import io.swagger.annotations.Api;
 import io.swagger.models.auth.In;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +32,8 @@ import java.util.List;
 @Path("/user")
 @Api(value = "/user", description = "")
 public class UserRoute {
+
+    private final Logger logger = LogManager.getLogger(UserRoute.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -77,6 +81,7 @@ public class UserRoute {
             submitted = jsonObject.getJSONArray("submitted");
         } catch (JSONException ex) {
             ex.printStackTrace();
+            logger.error(ex.getMessage());
             return Response.status(400).entity(ex.getMessage()).build();
         }
 
@@ -110,8 +115,11 @@ public class UserRoute {
                 .append("submitted", submitted);
 
         //Returns status code 409 conflict if user id already exists in the database.
-        if (MongoDB.userExists(id))
+        if (MongoDB.userExists(id)){
+            logger.info("An User with already existing ID was posted. Returned code 409. ");
             return Response.status(409).entity("CONFLICT! User with the specified ID already exists.").build();
+
+        }
 
         MongoDB.insertUser(document);
         System.out.println("Inserting user...");
@@ -158,6 +166,8 @@ public class UserRoute {
             submitted = jsonObject.getJSONArray("submitted");
         } catch (JSONException ex) {
             ex.printStackTrace();
+            logger.error(ex.getMessage());
+            return Response.status(400).entity(ex.getMessage()).build();
         }
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
