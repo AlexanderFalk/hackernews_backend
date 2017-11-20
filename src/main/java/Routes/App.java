@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Path("/")
-@Api(value = "/", description = "This is the default window")
+@Api(value = "/hackernews/", description = "This is the default window")
 public class App {
 
     private final Logger logger = LogManager.getLogger(App.class.getName());
