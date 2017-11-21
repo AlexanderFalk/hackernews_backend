@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Path("/user")
-@Api(value = "/user", description = "Here you will find operations about users",
+@Api(value = "/hackernews/user", description = "Here you will find operations about users",
         consumes = "application/json", produces = "application/json")
 public class UserRoute {
 
