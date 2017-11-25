@@ -98,7 +98,6 @@ public class ItemRoute {
                             "Possible an item with same ID")
             })
     public Response postItem(InputStream json) throws IOException {
-        requests.inc();
         try {
             requests.inc();
             BufferedReader reader = new BufferedReader(new InputStreamReader(json));
