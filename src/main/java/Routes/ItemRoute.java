@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 @Path("/item")
-@Api(value = "/item", description = "Here you will find operations about items",
+@Api(value = "/hackernews/item", description = "Here you will find operations about items",
     consumes = "application/json", produces = "application/json")
 public class ItemRoute {
 
