@@ -2,7 +2,7 @@
 <Configuration status="debug">
 
     <Properties>
-        <Property name="basePath">/Users/alexanderfalk/Documents/</Property>
+        <Property name="basePath">/Logging/</Property>
     </Properties>
 
     <Appenders>
