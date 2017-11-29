@@ -2,14 +2,18 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+
+import javax.print.Doc;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.util.JSON.parse;
@@ -257,7 +261,7 @@ public class MongoDB {
      * @return The return value is the latest item ID
      */
     public static int findLatestItem() {
-        MongoCursor<Document> cursor = itemCollection.find().iterator();
+        MongoCursor<Document> cursor = itemCollection.find().skip((int)itemCollection.count() -1).iterator();
 
         Document document = new Document();
         while(cursor.hasNext()) {
