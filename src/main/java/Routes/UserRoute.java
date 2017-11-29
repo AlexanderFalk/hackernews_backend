@@ -134,7 +134,7 @@ public class UserRoute {
         } catch (JSONException ex) {
             ex.printStackTrace();
             logger.error(ex.getMessage());
-            return Response.status(400).entity(ex.getMessage()).build();
+            return Response.status(400).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
         }
 
 
@@ -169,7 +169,7 @@ public class UserRoute {
         //Returns status code 409 conflict if user id already exists in the database.
         if (MongoDB.userExists(id)){
             logger.info("An User with already existing ID was posted. Returned code 409. ");
-            return Response.status(409).entity("CONFLICT! User with the specified ID already exists.").build();
+            return Response.status(409).entity("CONFLICT! User with the specified ID already exists.").type(MediaType.TEXT_PLAIN).build();
 
         }
 
@@ -229,7 +229,7 @@ public class UserRoute {
         } catch (JSONException ex) {
             ex.printStackTrace();
             logger.error("There were an issue formatting to JSON", ex.getMessage());
-            return Response.status(400).entity(ex.getMessage()).build();
+            return Response.status(400).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
         }
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());

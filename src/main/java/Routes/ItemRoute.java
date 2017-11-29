@@ -48,7 +48,7 @@ public class ItemRoute {
         requests.inc();
         if(MongoDB.getAllItems().isEmpty()) {
             logger.error("Returned code 204 - no items were retrieved.");
-            return Response.status(204).entity("No Items has been retrieved. Could be a server error").build();
+            return Response.status(204).entity("No Items has been retrieved. Could be a server error").type(MediaType.TEXT_PLAIN).build();
         }
         logger.info("All items were retrieved from host");
 
@@ -74,7 +74,7 @@ public class ItemRoute {
         if(MongoDB.getItem(id) == null) {
             logger.error("Returned code 204 - no item with id " + id + " found.",
                     new NullPointerException("No Item ID found"));
-            return Response.status(204).entity("Item not found").build();
+            return Response.status(204).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
         }
         logger.info("Item ID: " + id + " retrieved!");
         return Response.status(200).entity(MongoDB.getItem(id)).build();
@@ -152,7 +152,7 @@ public class ItemRoute {
             //Returns status code 409 conflict if item id already exists in the database.
             if (MongoDB.itemExists(item.getId())) {
                 logger.info("An item with an already existing ID was posted. Returned code 409.");
-                return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+                return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").type(MediaType.TEXT_PLAIN).build();
 
             }
 
@@ -168,7 +168,7 @@ public class ItemRoute {
             return Response.status(200).entity(itemDocument.toJson()).build();
         } catch (ServerErrorException see) {
             logger.error("Server error occured for postITEM. See trace", see);
-            return Response.status(500).build();
+            return Response.status(500).type(MediaType.TEXT_PLAIN).build();
         }
     }
 
@@ -322,7 +322,7 @@ public class ItemRoute {
         //Returns status code 409 conflict if item id already exists in the database.
         if (MongoDB.itemExists(item.getId())){
             logger.info("Comment (item) with id: " + item.getId() + " with an already existing ID was posted. Returned 409");
-            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").type(MediaType.TEXT_PLAIN).build();
 
         }
 
