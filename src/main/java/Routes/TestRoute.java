@@ -48,7 +48,7 @@ public class TestRoute {
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getMessage());
-            return Response.status(400).entity("Syntax error! Could not read supplied JSON text.").build();
+            return Response.status(400).entity("Syntax error! Could not read supplied JSON text.").type(MediaType.TEXT_PLAIN).build();
         }
 
         JSONObject jsonObject = null;
@@ -74,7 +74,7 @@ public class TestRoute {
         } catch (JSONException ex) {
             ex.printStackTrace();
             logger.error(ex.getMessage());
-            return Response.status(500).entity(ex.getMessage()).build();
+            return Response.status(500).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
         }
 
         JsonObject values = Json.createObjectBuilder()
@@ -120,7 +120,7 @@ public class TestRoute {
         //Returns status code 409 CONFLICT if item id already exists in the database.
         if (MongoDB.itemExists(hanesstId)){
             logger.info("Item with already existing hanesst_id was posted. Returned 409.");
-            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").build();
+            return Response.status(409).entity("CONFLICT! Item with the specified ID already exists.").type(MediaType.TEXT_PLAIN).build();
 
         }
 
