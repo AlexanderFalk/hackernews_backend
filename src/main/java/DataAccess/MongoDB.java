@@ -19,8 +19,8 @@ import static com.mongodb.util.JSON.parse;
 public class MongoDB {
 
     // Setup of MONGO DB
-    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
-    private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017");
+    private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
+    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017");
 
     private static MongoClient client = new MongoClient(connectionString);
 
