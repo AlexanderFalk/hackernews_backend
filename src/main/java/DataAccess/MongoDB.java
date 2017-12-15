@@ -23,6 +23,8 @@ public class MongoDB {
 
     // Setup of MONGO DB
     private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
+    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017"); //For local test purposes
+
     private static MongoClient client = new MongoClient(connectionString);
 
     // Access Database
@@ -91,7 +93,7 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
 
-    public static String getAllCategoryItems(Item.PostType postType){
+    public static String getAllCategoryItems(Item.PostType postType) {
         StringBuilder items = new StringBuilder();
         MongoCursor<Document> cursor = itemCollection.find(eq("type", postType.toString())).iterator();
         return iterateCollection(items, cursor);
@@ -99,8 +101,8 @@ public class MongoDB {
 
 
     /**
-<<<<<<< HEAD
-=======
+     <<<<<<< HEAD
+     =======
      * This method is used to retrieve all the items in the item collection
      * @return - A String which contains all the documents.
      */
@@ -123,8 +125,9 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
     */
+
     /**
->>>>>>> get_all_show
+     * >>>>>>> get_all_show
      * This method is used to insert item
      *
      * @param document - This parameter is the document pushed from the POST request
@@ -226,20 +229,19 @@ public class MongoDB {
     /**
      * The method pushes a new item into its parent.
      * Each comment is a kid to a post.
+     *
      * @param parentID - The parent ID
-     * @param kidID - The comments ID / new item
+     * @param kidID    - The comments ID / new item
      */
-    public static void addComment( int parentID, int kidID ) {
+    public static void addComment(int parentID, int kidID) {
         // Finds parent document to look at attribute 'kids' value
         Document document = itemCollection.find(eq("id", parentID)).first();
 
         // The queries
-        String jsonPush = "{$push:{kids:"+ kidID +"}}";
-        String jsonSet = "{$set:{kids:["+ kidID +"]}}";
+        String jsonPush = "{$push:{kids:" + kidID + "}}";
+        String jsonSet = "{$set:{kids:[" + kidID + "]}}";
 
         // parsed
-
-
 
 
         // First time insert of kid
@@ -258,17 +260,18 @@ public class MongoDB {
 
     /**
      * This method intends to take the latest item number and increment it by one
+     *
      * @return The return value is the latest item ID
      */
     public static int findLatestItem() {
-        MongoCursor<Document> cursor = itemCollection.find().skip((int)itemCollection.count() -1).iterator();
+        MongoCursor<Document> cursor = itemCollection.find().skip((int) itemCollection.count() - 1).iterator();
 
         Document document = new Document();
-        while(cursor.hasNext()) {
+        while (cursor.hasNext()) {
             document = cursor.next();
         }
 
-        if(document.isEmpty()) {
+        if (document.isEmpty()) {
             return 1;
         }
 
@@ -282,7 +285,7 @@ public class MongoDB {
             while (cursor.hasNext()) {
 
                 items.append(cursor.next().toJson());
-                if(cursor.hasNext()) {
+                if (cursor.hasNext()) {
                     items.append(",");
                 }
             }
