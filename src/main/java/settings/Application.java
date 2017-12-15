@@ -1,5 +1,6 @@
 package settings;
 
+import DataAccess.CORSFilter;
 import Routes.App;
 import Routes.ItemRoute;
 import Routes.TestRoute;
@@ -34,9 +35,10 @@ public class Application extends javax.ws.rs.core.Application {
         classes.add( UserRoute.class );
         classes.add( ItemRoute.class );
         classes.add( Metrics.Metrics.class );
-        classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-        classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        classes.add(TestRoute.class );
+        classes.add( io.swagger.jaxrs.listing.ApiListingResource.class);
+        classes.add( io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        classes.add( TestRoute.class );
+        classes.add( CORSFilter.class );
         return classes;
     }
 
