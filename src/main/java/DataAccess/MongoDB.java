@@ -99,8 +99,6 @@ public class MongoDB {
 
 
     /**
-<<<<<<< HEAD
-=======
      * This method is used to retrieve all the items in the item collection
      * @return - A String which contains all the documents.
      */
@@ -123,8 +121,8 @@ public class MongoDB {
         return iterateCollection(items, cursor);
     }
     */
+
     /**
->>>>>>> get_all_show
      * This method is used to insert item
      *
      * @param document - This parameter is the document pushed from the POST request
