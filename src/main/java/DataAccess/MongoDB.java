@@ -2,10 +2,7 @@ package DataAccess;
 
 import Model.Item;
 import Model.User;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -22,7 +19,9 @@ import static com.mongodb.util.JSON.parse;
 public class MongoDB {
 
     // Setup of MONGO DB
-    private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
+    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
+    private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017");
+
     private static MongoClient client = new MongoClient(connectionString);
 
     // Access Database
@@ -259,19 +258,30 @@ public class MongoDB {
      * @return The return value is the latest item ID
      */
     public static int findLatestItem() {
-        MongoCursor<Document> cursor = itemCollection.find().skip((int)itemCollection.count() -1).iterator();
+        Document document = itemCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
 
-        Document document = new Document();
-        while(cursor.hasNext()) {
-            document = cursor.next();
-        }
-
-        if(document.isEmpty()) {
-            return 1;
-        }
+//        Document document = new Document();
+//        while(cursor.hasNext()) {
+//            document = cursor.next();
+//        }
+//
+//        if(document.isEmpty()) {
+//            return 1;
+//        }
 
         int lastID = document.getInteger("id");
         return lastID + 1;
+    }
+
+    /**
+     * This method is made for the front-end to display the latest thirty items easily.
+     * @return latest thirty items as JSON
+     */
+    public static String getLastThirty(){
+        StringBuilder items = new StringBuilder();
+        MongoCursor<Document> cursor = itemCollection.find().sort(new BasicDBObject("_id", -1)).limit(30).iterator();
+        return iterateCollection(items, cursor);
+
     }
 
     private static String iterateCollection(StringBuilder items, MongoCursor<Document> cursor) {

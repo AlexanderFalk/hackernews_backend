@@ -3,6 +3,7 @@ package Routes;
 import DataAccess.MongoDB;
 import Model.Item;
 import Model.User;
+import com.mongodb.Mongo;
 import io.prometheus.client.Counter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -235,6 +236,19 @@ public class App {
             return Response.status(500).build();
         }
 
+
+    }
+
+    /**
+     * This method is made for the front-end to display the latest thirty items easily.
+     * @return 200 if okay.
+     */
+    @GET
+    @Path("/latestThirty")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLatestThirty(){
+        String latestThirtyJson = MongoDB.getLastThirty();
+        return Response.ok().entity(latestThirtyJson).build();
 
     }
 
