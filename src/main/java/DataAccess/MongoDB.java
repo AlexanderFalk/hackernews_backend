@@ -19,8 +19,8 @@ import static com.mongodb.util.JSON.parse;
 public class MongoDB {
 
     // Setup of MONGO DB
-    private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
-    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017"); //For local test purposes
+    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
+    private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017"); //For local test purposes
 
     private static MongoClient client = new MongoClient(connectionString);
 
@@ -274,12 +274,12 @@ public class MongoDB {
     }
 
     /**
-     * This method is made for the front-end to display the latest thirty items easily.
-     * @return latest thirty items as JSON
+     * This method is made for the front-end to display the latest thirty stories easily.
+     * @return latest thirty stories as JSON
      */
     public static String getLastThirty(){
         StringBuilder items = new StringBuilder();
-        MongoCursor<Document> cursor = itemCollection.find().sort(new BasicDBObject("_id", -1)).limit(30).iterator();
+        MongoCursor<Document> cursor = itemCollection.find(new BasicDBObject("type", "story")).sort(new BasicDBObject("_id", -1)).limit(30).iterator();
         return iterateCollection(items, cursor);
 
     }
