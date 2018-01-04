@@ -41,14 +41,14 @@ public class ItemRoute {
             responseContainer = "String")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 204, message = "No content/items found"),
+                    @ApiResponse(code = 404, message = "No content/items found"),
                     @ApiResponse(code = 200, message = "All items has been retrieved")
             })
     public Response item() {
         requests.inc();
         if(MongoDB.getAllItems().isEmpty()) {
-            logger.error("Returned code 204 - no items were retrieved.");
-            return Response.status(204).entity("No Items has been retrieved. Could be a server error").type(MediaType.TEXT_PLAIN).build();
+            logger.error("Returned code 404 - no items were retrieved.");
+            return Response.status(404).entity("No Items has been retrieved. Could be a server error").type(MediaType.TEXT_PLAIN).build();
         }
         logger.info("All items were retrieved from host");
 
@@ -66,15 +66,15 @@ public class ItemRoute {
             responseContainer = "String")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 204, message = "(Content) Item ID not found"),
+                    @ApiResponse(code = 404, message = "(Content) Item ID not found"),
                     @ApiResponse(code = 200, message = "Item ID found successfully")
     })
     public Response item(@PathParam("id") int id) {
         requests.inc();
         if(MongoDB.getItem(id) == null) {
-            logger.error("Returned code 204 - no item with id " + id + " found.",
+            logger.error("Returned code 404 - no item with id " + id + " found.",
                     new NullPointerException("No Item ID found"));
-            return Response.status(204).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
+            return Response.status(404).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
         }
         logger.info("Item ID: " + id + " retrieved!");
         return Response.status(200).entity(MongoDB.getItem(id)).build();
@@ -346,9 +346,9 @@ public class ItemRoute {
             MongoDB.deleteItem(itemId);
         }
         catch (NullPointerException ex){
-            logger.error("Returned code 204 - no item with id " + itemId + " found.",
+            logger.error("Returned code 404 - no item with id " + itemId + " found.",
                     ex.getMessage());
-            return Response.status(204).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
+            return Response.status(404).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
         }
 
         return Response.ok().entity("Item successfully deleted.").build();

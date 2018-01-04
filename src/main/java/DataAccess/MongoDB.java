@@ -20,8 +20,8 @@ import static com.mongodb.util.JSON.parse;
 public class MongoDB {
 
     // Setup of MONGO DB
-    private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017");
-    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017"); //For local test purposes
+    private static MongoClientURI connectionString = new MongoClientURI("mongodb://188.226.184.108:27017"); //TODO outcomment for prod use.
+    //private static MongoClientURI connectionString = new MongoClientURI("mongodb://localhost:27017"); //TODO outcomment for local test purposes.
 
     private static MongoClient client = new MongoClient(connectionString);
 
@@ -76,7 +76,14 @@ public class MongoDB {
                 .find(eq("id", ID))
                 .first();
 
-        return document.toJson();
+        try{
+            return document.toJson();
+        }
+        catch (NullPointerException ex){
+            ex.printStackTrace();
+        }
+        return null;
+
     }
 
     /**
@@ -85,7 +92,7 @@ public class MongoDB {
      * @param itemId Id of item to return as Document.
      * @return Item as Document type.
      */
-    public static Document getItemDocument(String itemId) {
+    public static Document getItemDocument(int itemId) {
         Document document = itemCollection
                 .find(eq("id", itemId))
                 .first();
@@ -230,7 +237,7 @@ public class MongoDB {
      * @throws NullPointerException if Item with specified ID does not exist.
      */
     public static void deleteItem(Item item) throws NullPointerException {
-        Document itemToDelete = getItemDocument(String.valueOf(item.getId()));
+        Document itemToDelete = getItemDocument(item.getId());
         if (itemToDelete == null) throw new NullPointerException("Item with specified ID not found.");
         itemCollection.deleteOne(itemToDelete);
     }
@@ -242,7 +249,7 @@ public class MongoDB {
      * @throws NullPointerException if Item with specified ID does not exist.
      */
     public static void deleteItem(int itemId) throws NullPointerException {
-        Document itemToDelete = getItemDocument(String.valueOf(itemId));
+        Document itemToDelete = getItemDocument(itemId);
         if (itemToDelete == null) throw new NullPointerException("Item with specified ID not found.");
         itemCollection.deleteOne(itemToDelete);
     }
