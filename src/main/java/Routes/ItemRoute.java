@@ -335,5 +335,26 @@ public class ItemRoute {
         return Response.status(200).entity(itemDocument.toJson()).build();
     }
 
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{id}")
+    public Response dropItem(InputStream json, @PathParam("id") int itemId){
+        requests.inc();
+
+        try{
+            MongoDB.deleteItem(itemId);
+        }
+        catch (NullPointerException ex){
+            logger.error("Returned code 204 - no item with id " + itemId + " found.",
+                    ex.getMessage());
+            return Response.status(204).entity("Item not found").type(MediaType.TEXT_PLAIN).build();
+        }
+
+        return Response.ok().entity("Item successfully deleted.").build();
+
+
+    }
+
 
 }

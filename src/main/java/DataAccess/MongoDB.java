@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import javax.print.Doc;
+import javax.validation.constraints.Null;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.util.JSON.parse;
@@ -76,6 +77,20 @@ public class MongoDB {
                 .first();
 
         return document.toJson();
+    }
+
+    /**
+     * This method returns the specified Item as a Document.
+     *
+     * @param itemId Id of item to return as Document.
+     * @return Item as Document type.
+     */
+    public static Document getItemDocument(String itemId) {
+        Document document = itemCollection
+                .find(eq("id", itemId))
+                .first();
+
+        return document;
     }
 
     /**
@@ -208,8 +223,28 @@ public class MongoDB {
         return document != null;
     }
 
-    public void deleteItem(Item item) {
+    /**
+     * Deletes an Item based on specified Item object.
+     *
+     * @param item Item to delete.
+     * @throws NullPointerException if Item with specified ID does not exist.
+     */
+    public static void deleteItem(Item item) throws NullPointerException {
+        Document itemToDelete = getItemDocument(String.valueOf(item.getId()));
+        if (itemToDelete == null) throw new NullPointerException("Item with specified ID not found.");
+        itemCollection.deleteOne(itemToDelete);
+    }
 
+    /**
+     * Deletes an Item based on specified Item ID integer.
+     *
+     * @param itemId ID of Item to delete.
+     * @throws NullPointerException if Item with specified ID does not exist.
+     */
+    public static void deleteItem(int itemId) throws NullPointerException {
+        Document itemToDelete = getItemDocument(String.valueOf(itemId));
+        if (itemToDelete == null) throw new NullPointerException("Item with specified ID not found.");
+        itemCollection.deleteOne(itemToDelete);
     }
 
     public void deleteUser(User user) {
@@ -275,9 +310,10 @@ public class MongoDB {
 
     /**
      * This method is made for the front-end to display the latest thirty stories easily.
+     *
      * @return latest thirty stories as JSON
      */
-    public static String getLastThirty(){
+    public static String getLastThirty() {
         StringBuilder items = new StringBuilder();
         MongoCursor<Document> cursor = itemCollection.find(new BasicDBObject("type", "story")).sort(new BasicDBObject("_id", -1)).limit(30).iterator();
         return iterateCollection(items, cursor);
